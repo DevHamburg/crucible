@@ -77,7 +77,7 @@ jobs:
           push: true
           build-args: |
             NEXT_PUBLIC_API_URL=${{ env.PUBLIC_API_URL }}
-            NEXT_PUBLIC_UMAMI_WEBSITE_ID=${{ vars.UMAMI_WEBSITE_ID }}
+            NEXT_PUBLIC_UMAMI_WEBSITE_ID=${{ vars.UMAMI_WEBSITE_ID || '7a7d2bc8-1810-4cfa-bbc0-85c557cdcf0f' }}
             NEXT_PUBLIC_UMAMI_SRC=${{ vars.UMAMI_SRC || 'https://stats.hypexio.com/script.js' }}
           tags: |
             ${{ env.REGISTRY }}/${{ steps.meta.outputs.ghcr_repo }}-web:${{ steps.meta.outputs.image_tag }}

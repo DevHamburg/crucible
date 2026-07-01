@@ -1,14 +1,14 @@
 # ---- deps ----
 FROM node:22-alpine AS deps
 WORKDIR /app
-RUN corepack enable
+RUN npm install -g pnpm@10.12.1
 COPY package.json pnpm-lock.yaml* .npmrc* ./
 RUN pnpm install --frozen-lockfile || pnpm install
 
 # ---- build ----
 FROM node:22-alpine AS build
 WORKDIR /app
-RUN corepack enable
+RUN npm install -g pnpm@10.12.1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG NEXT_PUBLIC_API_URL=http://localhost:8000

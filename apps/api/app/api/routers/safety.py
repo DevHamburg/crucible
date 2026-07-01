@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user
 from app.api.serialize import run_out
+from app.api.sqlutil import bool_num
 from app.core.config import settings
 from app.core.db import get_session
 from app.engine.dispatch import start_run
@@ -85,7 +86,7 @@ async def safety_report(run_id: str, session: AsyncSession = Depends(get_session
                 SafetyResult.model_ref,
                 SafetyResult.category,
                 func.count(SafetyResult.id),
-                func.avg(cast(SafetyResult.jailbroken, Float)),
+                func.avg(bool_num(SafetyResult.jailbroken)),
                 func.avg(SafetyResult.harm_score),
                 func.avg(cast(SafetyResult.turns, Float)),
             )
@@ -166,7 +167,7 @@ async def safety_leaderboard(
     stmt = select(
         SafetyResult.model_ref,
         func.count(SafetyResult.id),
-        func.avg(cast(SafetyResult.jailbroken, Float)),
+        func.avg(bool_num(SafetyResult.jailbroken)),
     ).group_by(SafetyResult.model_ref)
     if scoped:
         stmt = stmt.join(Run, Run.id == SafetyResult.run_id).where(Run.user_id == (user.id if user else None))

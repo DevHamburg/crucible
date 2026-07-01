@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, is_registered
 from app.api.serialize import run_out
+from app.api.sqlutil import bool_num
 from app.api.sse import event_stream
 from app.core.config import settings
 from app.core.db import get_session
@@ -125,7 +126,7 @@ async def run_results(
                 Result.domain,
                 func.count(Result.id),
                 func.avg(Result.score),
-                func.avg(cast(Result.passed, Float)),
+                func.avg(bool_num(Result.passed)),
                 func.avg(Result.latency_ms),
                 func.sum(Result.cost),
             )

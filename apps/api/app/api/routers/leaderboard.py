@@ -6,6 +6,7 @@ from sqlalchemy import Float, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, is_registered
+from app.api.sqlutil import bool_num
 from app.arena.rating import compute_bradley_terry, compute_elo
 from app.core.db import get_session
 from app.models import ArenaMatch, ModelCatalog, Result, Run, User
@@ -30,7 +31,7 @@ async def capability_leaderboard(
         Result.model_ref,
         func.count(Result.id),
         func.avg(Result.score),
-        func.avg(cast(Result.passed, Float)),
+        func.avg(bool_num(Result.passed)),
         func.avg(Result.latency_ms),
         func.sum(Result.cost),
     ).group_by(Result.model_ref)

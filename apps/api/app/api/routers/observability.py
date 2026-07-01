@@ -6,6 +6,7 @@ from sqlalchemy import Float, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, is_registered
+from app.api.sqlutil import bool_num
 from app.core.db import get_session
 from app.models import Generation, ModelCatalog, Result, Run, User
 
@@ -70,7 +71,7 @@ async def costs(
         func.sum(Generation.completion_tokens),
         func.sum(Generation.cost),
         func.avg(Generation.latency_ms),
-        func.avg(cast(Generation.status == "error", Float)),
+        func.avg(bool_num(Generation.status == "error")),
     ).group_by(Generation.model_ref)
     if scoped:
         stmt = stmt.join(Run, Run.id == Generation.run_id).where(Run.user_id == (user.id if user else None))

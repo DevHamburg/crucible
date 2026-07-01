@@ -1,0 +1,136 @@
+{
+  "slug": "code-algorithms",
+  "name": "Algorithms — Function Synthesis",
+  "domain": "software",
+  "description": "Original algorithmic function-synthesis problems (strings, arrays, math, recursion/DP) inspired by HumanEval+. Each item provides a verified canonical Python solution and direct assert-based tests.",
+  "task_type": "code",
+  "scoring_type": "code_exec",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://huggingface.co/datasets/evalplus/humanevalplus",
+  "config": {
+    "timeout": 8
+  },
+  "items": [
+    {
+      "external_id": "digital_root",
+      "difficulty": "easy",
+      "prompt": "Implement `digital_root(n)`. Given an integer `n`, repeatedly sum its decimal digits until a single digit (0-9) remains, and return that digit. Negative inputs are treated by their absolute value. For example, `digital_root(12345)` returns 6 because 1+2+3+4+5=15 and 1+5=6.",
+      "input": {},
+      "reference": {
+        "entry_point": "digital_root",
+        "canonical_solution": "def digital_root(n):\n    n = abs(n)\n    while n >= 10:\n        n = sum(int(d) for d in str(n))\n    return n",
+        "test": "assert digital_root(0) == 0\nassert digital_root(9) == 9\nassert digital_root(12345) == 6\nassert digital_root(99999) == 9\nassert digital_root(-38) == 2\nassert digital_root(10) == 1"
+      }
+    },
+    {
+      "external_id": "count_vowels",
+      "difficulty": "easy",
+      "prompt": "Implement `count_vowels(s)`. Count the vowels in string `s`, case-insensitively. The letters a, e, i, o, u are always vowels. The letter 'y' counts as a vowel only when it is the last character of the string. Return the total count as an integer. For example, `count_vowels(\"happy\")` returns 2.",
+      "input": {},
+      "reference": {
+        "entry_point": "count_vowels",
+        "canonical_solution": "def count_vowels(s):\n    vowels = set(\"aeiou\")\n    count = 0\n    lower = s.lower()\n    for i, ch in enumerate(lower):\n        if ch in vowels:\n            count += 1\n        elif ch == \"y\" and i == len(lower) - 1:\n            count += 1\n    return count",
+        "test": "assert count_vowels(\"abcde\") == 2\nassert count_vowels(\"ACEDY\") == 3\nassert count_vowels(\"rhythm\") == 0\nassert count_vowels(\"happy\") == 2\nassert count_vowels(\"\") == 0\nassert count_vowels(\"yellowy\") == 3"
+      }
+    },
+    {
+      "external_id": "run_length_encode",
+      "difficulty": "easy",
+      "prompt": "Implement `run_length_encode(s)`. Return the run-length encoding of string `s`: replace each maximal run of a repeated character with that character followed by the run length as a decimal number. For example, `run_length_encode(\"aaabbc\")` returns \"a3b2c1\". An empty string encodes to an empty string.",
+      "input": {},
+      "reference": {
+        "entry_point": "run_length_encode",
+        "canonical_solution": "def run_length_encode(s):\n    if not s:\n        return \"\"\n    result = []\n    prev = s[0]\n    cnt = 1\n    for ch in s[1:]:\n        if ch == prev:\n            cnt += 1\n        else:\n            result.append(prev + str(cnt))\n            prev = ch\n            cnt = 1\n    result.append(prev + str(cnt))\n    return \"\".join(result)",
+        "test": "assert run_length_encode(\"aaabbc\") == \"a3b2c1\"\nassert run_length_encode(\"\") == \"\"\nassert run_length_encode(\"x\") == \"x1\"\nassert run_length_encode(\"wwwwww\") == \"w6\"\nassert run_length_encode(\"abcd\") == \"a1b1c1d1\""
+      }
+    },
+    {
+      "external_id": "second_largest",
+      "difficulty": "medium",
+      "prompt": "Implement `second_largest(nums)`. Given a list of integers `nums`, return the second largest DISTINCT value. If there are fewer than two distinct values, return `None`. For example, `second_largest([4, 4, 3, 2])` returns 3, and `second_largest([5, 5, 5])` returns None.",
+      "input": {},
+      "reference": {
+        "entry_point": "second_largest",
+        "canonical_solution": "def second_largest(nums):\n    distinct = sorted(set(nums), reverse=True)\n    if len(distinct) < 2:\n        return None\n    return distinct[1]",
+        "test": "assert second_largest([1, 2, 3, 4]) == 3\nassert second_largest([5, 5, 5]) is None\nassert second_largest([10]) is None\nassert second_largest([4, 4, 3, 2]) == 3\nassert second_largest([-1, -2, -3]) == -2\nassert second_largest([7, 7, 8]) == 7"
+      }
+    },
+    {
+      "external_id": "is_balanced",
+      "difficulty": "medium",
+      "prompt": "Implement `is_balanced(s)`. Return True if all brackets in string `s` are correctly balanced and nested, else False. The bracket types are (), [], and {}. Any non-bracket characters are ignored. An empty string is balanced. For example, `is_balanced(\"([{}])\")` is True and `is_balanced(\"([)]\")` is False.",
+      "input": {},
+      "reference": {
+        "entry_point": "is_balanced",
+        "canonical_solution": "def is_balanced(s):\n    pairs = {\")\": \"(\", \"]\": \"[\", \"}\": \"{\"}\n    stack = []\n    for ch in s:\n        if ch in \"([{\":\n            stack.append(ch)\n        elif ch in \")]}\":\n            if not stack or stack.pop() != pairs[ch]:\n                return False\n    return not stack",
+        "test": "assert is_balanced(\"()\") == True\nassert is_balanced(\"([{}])\") == True\nassert is_balanced(\"([)]\") == False\nassert is_balanced(\"(((\") == False\nassert is_balanced(\"\") == True\nassert is_balanced(\"a(b)c[d]\") == True\nassert is_balanced(\"}{\") == False"
+      }
+    },
+    {
+      "external_id": "caesar_cipher",
+      "difficulty": "medium",
+      "prompt": "Implement `caesar_cipher(text, shift)`. Shift every alphabetic character in `text` forward by `shift` positions in the alphabet, wrapping around (z -> a). Preserve letter case and leave all non-alphabetic characters unchanged. `shift` may be any integer, including negative. For example, `caesar_cipher(\"xyz\", 3)` returns \"abc\".",
+      "input": {},
+      "reference": {
+        "entry_point": "caesar_cipher",
+        "canonical_solution": "def caesar_cipher(text, shift):\n    result = []\n    for ch in text:\n        if ch.isupper():\n            result.append(chr((ord(ch) - 65 + shift) % 26 + 65))\n        elif ch.islower():\n            result.append(chr((ord(ch) - 97 + shift) % 26 + 97))\n        else:\n            result.append(ch)\n    return \"\".join(result)",
+        "test": "assert caesar_cipher(\"abc\", 1) == \"bcd\"\nassert caesar_cipher(\"xyz\", 3) == \"abc\"\nassert caesar_cipher(\"Hello, World!\", 5) == \"Mjqqt, Btwqi!\"\nassert caesar_cipher(\"abc\", -1) == \"zab\"\nassert caesar_cipher(\"abc\", 26) == \"abc\"\nassert caesar_cipher(\"\", 4) == \"\""
+      }
+    },
+    {
+      "external_id": "merge_intervals",
+      "difficulty": "medium",
+      "prompt": "Implement `merge_intervals(intervals)`. Given a list of `(start, end)` integer tuples, merge all overlapping or touching intervals and return the merged list as a list of tuples sorted by start. Intervals that merely touch at an endpoint (e.g. (1,4) and (4,5)) are merged. For example, `merge_intervals([(1, 3), (2, 6), (8, 10)])` returns `[(1, 6), (8, 10)]`.",
+      "input": {},
+      "reference": {
+        "entry_point": "merge_intervals",
+        "canonical_solution": "def merge_intervals(intervals):\n    if not intervals:\n        return []\n    s = sorted(intervals, key=lambda x: x[0])\n    merged = [list(s[0])]\n    for start, end in s[1:]:\n        if start <= merged[-1][1]:\n            merged[-1][1] = max(merged[-1][1], end)\n        else:\n            merged.append([start, end])\n    return [tuple(m) for m in merged]",
+        "test": "assert merge_intervals([(1, 3), (2, 6), (8, 10), (15, 18)]) == [(1, 6), (8, 10), (15, 18)]\nassert merge_intervals([(1, 4), (4, 5)]) == [(1, 5)]\nassert merge_intervals([]) == []\nassert merge_intervals([(1, 4), (2, 3)]) == [(1, 4)]\nassert merge_intervals([(5, 6), (1, 2)]) == [(1, 2), (5, 6)]"
+      }
+    },
+    {
+      "external_id": "lcs_length",
+      "difficulty": "hard",
+      "prompt": "Implement `lcs_length(a, b)`. Return the length of the longest common subsequence of strings `a` and `b`. A subsequence keeps relative order but need not be contiguous. For example, `lcs_length(\"abcde\", \"ace\")` returns 3 (\"ace\").",
+      "input": {},
+      "reference": {
+        "entry_point": "lcs_length",
+        "canonical_solution": "def lcs_length(a, b):\n    m, n = len(a), len(b)\n    dp = [[0] * (n + 1) for _ in range(m + 1)]\n    for i in range(1, m + 1):\n        for j in range(1, n + 1):\n            if a[i - 1] == b[j - 1]:\n                dp[i][j] = dp[i - 1][j - 1] + 1\n            else:\n                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])\n    return dp[m][n]",
+        "test": "assert lcs_length(\"abcde\", \"ace\") == 3\nassert lcs_length(\"abc\", \"abc\") == 3\nassert lcs_length(\"abc\", \"def\") == 0\nassert lcs_length(\"\", \"abc\") == 0\nassert lcs_length(\"AGGTAB\", \"GXTXAYB\") == 4\nassert lcs_length(\"bl\", \"yby\") == 1"
+      }
+    },
+    {
+      "external_id": "count_change",
+      "difficulty": "hard",
+      "prompt": "Implement `count_change(amount, coins)`. Return the number of distinct ways to make exactly `amount` using the given `coins`, where each coin denomination may be used unlimited times and orderings that use the same multiset of coins count once. There is exactly one way to make amount 0 (use no coins). For example, `count_change(5, [1, 2, 5])` returns 4.",
+      "input": {},
+      "reference": {
+        "entry_point": "count_change",
+        "canonical_solution": "def count_change(amount, coins):\n    dp = [0] * (amount + 1)\n    dp[0] = 1\n    for coin in coins:\n        for x in range(coin, amount + 1):\n            dp[x] += dp[x - coin]\n    return dp[amount]",
+        "test": "assert count_change(5, [1, 2, 5]) == 4\nassert count_change(3, [2]) == 0\nassert count_change(0, [1, 2]) == 1\nassert count_change(10, [2, 5, 3, 6]) == 5\nassert count_change(4, [1, 2, 3]) == 4"
+      }
+    },
+    {
+      "external_id": "spiral_order",
+      "difficulty": "hard",
+      "prompt": "Implement `spiral_order(matrix)`. Given a 2D list `matrix` (a list of equal-length rows), return a flat list of its elements visited in clockwise spiral order starting from the top-left, going right along the top row, then down the right column, and so on inward. Return an empty list for an empty matrix. For example, `spiral_order([[1,2,3],[4,5,6],[7,8,9]])` returns `[1, 2, 3, 6, 9, 8, 7, 4, 5]`.",
+      "input": {},
+      "reference": {
+        "entry_point": "spiral_order",
+        "canonical_solution": "def spiral_order(matrix):\n    if not matrix or not matrix[0]:\n        return []\n    result = []\n    top, bottom = 0, len(matrix) - 1\n    left, right = 0, len(matrix[0]) - 1\n    while top <= bottom and left <= right:\n        for c in range(left, right + 1):\n            result.append(matrix[top][c])\n        top += 1\n        for r in range(top, bottom + 1):\n            result.append(matrix[r][right])\n        right -= 1\n        if top <= bottom:\n            for c in range(right, left - 1, -1):\n                result.append(matrix[bottom][c])\n            bottom -= 1\n        if left <= right:\n            for r in range(bottom, top - 1, -1):\n                result.append(matrix[r][left])\n            left += 1\n    return result",
+        "test": "assert spiral_order([[1, 2, 3], [4, 5, 6], [7, 8, 9]]) == [1, 2, 3, 6, 9, 8, 7, 4, 5]\nassert spiral_order([[1, 2], [3, 4]]) == [1, 2, 4, 3]\nassert spiral_order([[1, 2, 3, 4]]) == [1, 2, 3, 4]\nassert spiral_order([]) == []\nassert spiral_order([[1], [2], [3]]) == [1, 2, 3]"
+      }
+    },
+    {
+      "external_id": "parse_int_prefix",
+      "difficulty": "medium",
+      "prompt": "Implement `parse_int_prefix(s)`. Parse a leading integer from string `s`, mimicking a simplified atoi: skip leading whitespace, then read an optional single '+' or '-' sign, then consecutive decimal digits, stopping at the first non-digit. Return the resulting integer, or 0 if no digits are found. For example, `parse_int_prefix(\"   -17abc\")` returns -17 and `parse_int_prefix(\"3.14\")` returns 3.",
+      "input": {},
+      "reference": {
+        "entry_point": "parse_int_prefix",
+        "canonical_solution": "def parse_int_prefix(s):\n    s = s.lstrip()\n    if not s:\n        return 0\n    i = 0\n    sign = 1\n    if s[0] in \"+-\":\n        if s[0] == \"-\":\n            sign = -1\n        i = 1\n    num = 0\n    found = False\n    while i < len(s) and s[i].isdigit():\n        num = num * 10 + int(s[i])\n        i += 1\n        found = True\n    return sign * num if found else 0",
+        "test": "assert parse_int_prefix(\"42\") == 42\nassert parse_int_prefix(\"   -17abc\") == -17\nassert parse_int_prefix(\"+9\") == 9\nassert parse_int_prefix(\"abc\") == 0\nassert parse_int_prefix(\"\") == 0\nassert parse_int_prefix(\"3.14\") == 3\nassert parse_int_prefix(\"-\") == 0"
+      }
+    }
+  ]
+}

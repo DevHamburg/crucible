@@ -1,0 +1,114 @@
+{
+  "slug": "finance-numeric",
+  "name": "Financial Reasoning — Numeric",
+  "domain": "trading",
+  "description": "FinQA-style numeric financial reasoning benchmark with 11 original items requiring exact computation of growth rates, margins, ratios, and differences from small tables.",
+  "task_type": "numeric",
+  "scoring_type": "numeric",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://huggingface.co/datasets/ibm-research/finqa",
+  "config": {
+    "rel_tol": 0.01
+  },
+  "items": [
+    {
+      "external_id": "fin-num-01",
+      "prompt": "Company Vireo Foods reported net revenue of $4,310 million in fiscal 2021 and $4,820 million in fiscal 2022. What was the year-over-year percentage growth in net revenue from 2021 to 2022? Give the answer in percent, rounded to two decimals. End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 11.83
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fin-num-02",
+      "prompt": "For the year ended December 31, Nimbus Manufacturing reported total revenue of $12,500 thousand and cost of goods sold of $8,125 thousand. What was the gross profit margin as a percentage of revenue? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 35
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fin-num-03",
+      "prompt": "Delta Retail Group posted revenue of $7,800 million and net income of $936 million for the fiscal year. What was the net profit margin, expressed as a percentage? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 12
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fin-num-04",
+      "prompt": "At year-end, Harbor Logistics had total current assets of $3,420 thousand and total current liabilities of $1,710 thousand. What was the current ratio (current assets divided by current liabilities)? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 2
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fin-num-05",
+      "prompt": "Orion Semiconductors reported operating income of $1,540 million in 2022 and $1,980 million in 2023. By how many millions of dollars did operating income increase from 2022 to 2023? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 440
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fin-num-06",
+      "prompt": "Sable Pharmaceuticals earned net income of $2,400 million and had 600 million weighted-average shares outstanding during the year. What was the basic earnings per share (EPS) in dollars? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 4
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "fin-num-07",
+      "prompt": "On its balance sheet, Cascade Utilities reported total debt of $5,600 million and total shareholders' equity of $8,000 million. What was the debt-to-equity ratio? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 0.7
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "fin-num-08",
+      "prompt": "Meridian Corp reported total company revenue of $4,500 million, of which the Cloud segment contributed $1,350 million. What percentage of total revenue came from the Cloud segment? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 30
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "fin-num-09",
+      "prompt": "Aurora Beverages grew its annual revenue from $1,000 million to $1,728 million over exactly 3 years. What was the compound annual growth rate (CAGR) over this period, expressed as a percentage? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 20
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "fin-num-10",
+      "prompt": "Fjord Apparel reported cost of goods sold of $9,600 thousand for the year. Its inventory was $1,400 thousand at the beginning of the year and $1,800 thousand at the end of the year. What was the inventory turnover ratio (cost of goods sold divided by average inventory)? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 6
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "fin-num-11",
+      "prompt": "Titan Industries reported net income of $1,400 million and declared total dividends of $420 million for the fiscal year. What was the dividend payout ratio, expressed as a percentage? End with 'The answer is <number>'.",
+      "input": {},
+      "reference": {
+        "answer": 30
+      },
+      "difficulty": "medium"
+    }
+  ]
+}

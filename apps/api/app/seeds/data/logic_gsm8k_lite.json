@@ -1,0 +1,25 @@
+{
+  "slug": "gsm8k-lite",
+  "name": "GSM8K-Lite — Grade-School Math",
+  "domain": "logic",
+  "description": "Original grade-school multi-step arithmetic word problems in the style of GSM8K. Tests multi-step numeric reasoning.",
+  "task_type": "numeric",
+  "scoring_type": "numeric",
+  "license": "CC-BY-4.0 (original items; inspired by openai/gsm8k)",
+  "source_url": "https://huggingface.co/datasets/openai/gsm8k",
+  "config": { "rel_tol": 0.001 },
+  "items": [
+    { "external_id": "g1", "prompt": "A baker made 48 cookies and sold 3/4 of them. How many cookies are left? End with 'The answer is <number>'.", "reference": { "answer": 12 }, "difficulty": "easy" },
+    { "external_id": "g2", "prompt": "Tom has 5 boxes with 12 apples each. He gives away 18 apples. How many apples remain? End with 'The answer is <number>'.", "reference": { "answer": 42 }, "difficulty": "easy" },
+    { "external_id": "g3", "prompt": "A train travels 60 km in 45 minutes. What is its speed in km/h? End with 'The answer is <number>'.", "reference": { "answer": 80 }, "difficulty": "medium" },
+    { "external_id": "g4", "prompt": "Sarah saves $15 per week. After how many weeks will she have saved $180? End with 'The answer is <number>'.", "reference": { "answer": 12 }, "difficulty": "easy" },
+    { "external_id": "g5", "prompt": "A shirt costs $40 after a 20% discount. What was the original price in dollars? End with 'The answer is <number>'.", "reference": { "answer": 50 }, "difficulty": "medium" },
+    { "external_id": "g6", "prompt": "A rectangle is 8 cm by 5 cm. What is its perimeter in cm? End with 'The answer is <number>'.", "reference": { "answer": 26 }, "difficulty": "easy" },
+    { "external_id": "g7", "prompt": "If 3 pens cost $2.10, how much do 7 pens cost in dollars? End with 'The answer is <number>'.", "reference": { "answer": 4.9 }, "difficulty": "medium" },
+    { "external_id": "g8", "prompt": "A tank fills at 4 liters per minute. How many minutes does it take to fill 52 liters? End with 'The answer is <number>'.", "reference": { "answer": 13 }, "difficulty": "easy" },
+    { "external_id": "g9", "prompt": "John is twice as old as Mary. Together they are 36 years old. How old is John? End with 'The answer is <number>'.", "reference": { "answer": 24 }, "difficulty": "medium" },
+    { "external_id": "g10", "prompt": "A car uses 6 liters of fuel per 100 km. How many liters does it use for a 250 km trip? End with 'The answer is <number>'.", "reference": { "answer": 15 }, "difficulty": "medium" },
+    { "external_id": "g11", "prompt": "A class has 30 students. 40% are boys. How many girls are in the class? End with 'The answer is <number>'.", "reference": { "answer": 18 }, "difficulty": "easy" },
+    { "external_id": "g12", "prompt": "You buy 3 notebooks at $2.50 each and pay with a $10 bill. How much change do you get in dollars? End with 'The answer is <number>'.", "reference": { "answer": 2.5 }, "difficulty": "easy" }
+  ]
+}

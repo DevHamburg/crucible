@@ -1,0 +1,189 @@
+{
+  "slug": "general-knowledge",
+  "name": "General Knowledge (MMLU-style)",
+  "domain": "general",
+  "description": "Broad-knowledge multiple-choice questions spanning science, history, geography, and the arts. Each item has four options with exactly one correct answer, inspired by the MMLU dataset.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://huggingface.co/datasets/cais/mmlu",
+  "config": {},
+  "items": [
+    {
+      "external_id": "gk-001",
+      "prompt": "Which chemical element has the atomic number 79 and the symbol Au?\nA) Silver\nB) Gold\nC) Platinum\nD) Copper\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Silver",
+          "Gold",
+          "Platinum",
+          "Copper"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "gk-002",
+      "prompt": "In which year did the Berlin Wall fall, marking a symbolic end to the division of Germany?\nA) 1987\nB) 1989\nC) 1991\nD) 1993\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "1987",
+          "1989",
+          "1991",
+          "1993"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "gk-003",
+      "prompt": "Which river is the longest in the world by most commonly cited measurements?\nA) Amazon\nB) Yangtze\nC) Nile\nD) Mississippi\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Amazon",
+          "Yangtze",
+          "Nile",
+          "Mississippi"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "gk-004",
+      "prompt": "Who painted the ceiling of the Sistine Chapel in the Vatican?\nA) Leonardo da Vinci\nB) Raphael\nC) Michelangelo\nD) Donatello\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Leonardo da Vinci",
+          "Raphael",
+          "Michelangelo",
+          "Donatello"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "gk-005",
+      "prompt": "Which subatomic particle carries a negative electric charge and orbits the nucleus of an atom?\nA) Proton\nB) Neutron\nC) Electron\nD) Photon\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Proton",
+          "Neutron",
+          "Electron",
+          "Photon"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "gk-006",
+      "prompt": "The Treaty of Westphalia, signed in 1648, ended which major European conflict?\nA) The Hundred Years' War\nB) The Thirty Years' War\nC) The Napoleonic Wars\nD) The War of the Spanish Succession\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "The Hundred Years' War",
+          "The Thirty Years' War",
+          "The Napoleonic Wars",
+          "The War of the Spanish Succession"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "gk-007",
+      "prompt": "In economics, what term describes a market structure dominated by a single seller with no close substitutes for its product?\nA) Oligopoly\nB) Monopoly\nC) Perfect competition\nD) Monopsony\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Oligopoly",
+          "Monopoly",
+          "Perfect competition",
+          "Monopsony"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "gk-008",
+      "prompt": "Which planet in our solar system has the most extensive and visible ring system?\nA) Jupiter\nB) Uranus\nC) Saturn\nD) Neptune\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Jupiter",
+          "Uranus",
+          "Saturn",
+          "Neptune"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "gk-009",
+      "prompt": "In music theory, how many semitones are there in a perfect fifth?\nA) 5\nB) 7\nC) 8\nD) 12\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "5",
+          "7",
+          "8",
+          "12"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "gk-010",
+      "prompt": "Which biological process do plants use to convert light energy, water, and carbon dioxide into glucose and oxygen?\nA) Respiration\nB) Transpiration\nC) Photosynthesis\nD) Fermentation\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Respiration",
+          "Transpiration",
+          "Photosynthesis",
+          "Fermentation"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "gk-011",
+      "prompt": "The philosophical principle known as 'Occam's Razor' advises that when faced with competing explanations, one should generally prefer the one that:\nA) is supported by the most authorities\nB) makes the fewest assumptions\nC) is the most elegant mathematically\nD) has been believed the longest\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "is supported by the most authorities",
+          "makes the fewest assumptions",
+          "is the most elegant mathematically",
+          "has been believed the longest"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "hard"
+    }
+  ]
+}

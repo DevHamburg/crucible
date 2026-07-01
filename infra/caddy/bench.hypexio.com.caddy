@@ -1,0 +1,49 @@
+# Crucible site block — ADD THIS to hypexio's Caddyfile
+# (repo: DevHamburg/hypexio -> infra/caddy/Caddyfile), so it survives hypexio
+# redeploys. The single shared Caddy already owns 80/443 on the server.
+#
+# Prereqs:
+#   * DNS: A record  bench.hypexio.com -> 178.104.229.200
+#   * Crucible's crucible-api / crucible-web containers join hypexio's Caddy
+#     network (they do, via EDGE_NETWORK=hypexio_web in the Crucible compose).
+#
+# Caddy auto-provisions the TLS cert on first request. The frontend calls the API
+# same-origin under /api/*, which Caddy strips and forwards to the FastAPI app.
+
+bench.hypexio.com {
+	encode zstd gzip
+
+	header {
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# Health endpoint used by the Crucible deploy workflow's HEALTH_URL.
+	handle /health {
+		reverse_proxy crucible-api:8000
+	}
+
+	# /api/* -> stripped -> FastAPI (routes live at root: /runs, /models, ...).
+	# Long timeouts so SSE run/tournament streams stay open.
+	handle_path /api/* {
+		reverse_proxy crucible-api:8000 {
+			flush_interval -1
+			transport http {
+				read_timeout 1h
+				write_timeout 1h
+			}
+		}
+	}
+
+	# Everything else -> the Next.js frontend.
+	handle {
+		reverse_proxy crucible-web:3000
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

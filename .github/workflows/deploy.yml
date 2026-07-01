@@ -1,0 +1,141 @@
+# =============================================================
+# Crucible — container deploy to the shared Hetzner server (next to hypexio).
+#
+#   1. images   buildx -> push api + web to GHCR (tags :sha and :latest)
+#   2. deploy   ssh to server, rsync compose + deploy script, pull, up, healthcheck
+#
+# The web image bakes NEXT_PUBLIC_API_URL=https://bench.hypexio.com/api at build
+# time (Caddy strips /api and forwards to the FastAPI container).
+#
+# Required GitHub secrets (Settings -> Secrets and variables -> Actions):
+#   HETZNER_HOST     178.104.229.200         (same server as hypexio)
+#   HETZNER_USER     deploy
+#   HETZNER_SSH_KEY  full private key (contents of SSH/hypexio_deploy_key)
+#   HETZNER_PORT     optional, default 22
+#   DEPLOY_PATH      /opt/crucible
+#   HEALTH_URL       optional, default https://bench.hypexio.com/health
+#
+# GITHUB_TOKEN is provided automatically and used to push to GHCR.
+# After the first images run, either make the GHCR packages public OR
+# `docker login ghcr.io` on the server so it can pull (see docs/DEPLOYMENT.md).
+# =============================================================
+name: Deploy Crucible
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-crucible
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  PUBLIC_API_URL: https://bench.hypexio.com/api
+
+jobs:
+  images:
+    name: Build & push images
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      ghcr_repo: ${{ steps.meta.outputs.ghcr_repo }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: meta
+        run: |
+          echo "image_tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "ghcr_repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push api
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/api
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.ghcr_repo }}-api:${{ steps.meta.outputs.image_tag }}
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.ghcr_repo }}-api:latest
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+      - name: Build & push web
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/web
+          file: apps/web/Dockerfile
+          push: true
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ env.PUBLIC_API_URL }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.ghcr_repo }}-web:${{ steps.meta.outputs.image_tag }}
+            ${{ env.REGISTRY }}/${{ steps.meta.outputs.ghcr_repo }}-web:latest
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+  deploy:
+    name: Deploy to server
+    needs: [images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.HETZNER_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "${{ secrets.HETZNER_PORT || '22' }}" -H "${{ secrets.HETZNER_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Rsync compose + deploy script
+        env:
+          PORT: ${{ secrets.HETZNER_PORT || '22' }}
+          USER: ${{ secrets.HETZNER_USER }}
+          HOST: ${{ secrets.HETZNER_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          ssh -i ~/.ssh/id_deploy -p "$PORT" "$USER@$HOST" "mkdir -p '$DEPLOY_PATH'"
+          rsync -avz -e "ssh -i ~/.ssh/id_deploy -p $PORT" \
+            infra/compose/docker-compose.prod.yml \
+            infra/scripts/deploy-recreate.sh \
+            .env.prod.example \
+            "$USER@$HOST:$DEPLOY_PATH/"
+          ssh -i ~/.ssh/id_deploy -p "$PORT" "$USER@$HOST" "chmod +x '$DEPLOY_PATH/deploy-recreate.sh'"
+      - name: Pull, up, verify
+        env:
+          PORT: ${{ secrets.HETZNER_PORT || '22' }}
+          USER: ${{ secrets.HETZNER_USER }}
+          HOST: ${{ secrets.HETZNER_HOST }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          IMAGE_TAG: ${{ github.sha }}
+          GHCR_REPO: ${{ needs.images.outputs.ghcr_repo }}
+        run: |
+          ssh -i ~/.ssh/id_deploy -p "$PORT" \
+              -o ServerAliveInterval=30 -o ServerAliveCountMax=20 \
+              "$USER@$HOST" \
+              "cd '$DEPLOY_PATH' && bash ./deploy-recreate.sh '$IMAGE_TAG' '$GHCR_REPO'"
+      - name: Healthcheck
+        env:
+          HEALTH_URL: ${{ secrets.HEALTH_URL || 'https://bench.hypexio.com/health' }}
+        run: |
+          for i in $(seq 1 12); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo 000)
+            echo "attempt $i: HTTP $code"
+            [ "$code" = "200" ] && exit 0
+            sleep 6
+          done
+          echo "health check failed"; exit 1
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_deploy

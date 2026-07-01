@@ -1,0 +1,49 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.sqlite3
+*.db
+
+# ---- Node ----
+node_modules/
+.next/
+out/
+.turbo/
+dist/
+build/
+*.tsbuildinfo
+.pnpm-store/
+
+# ---- Env / secrets ----
+.env
+.env.local
+.env.*.local
+*.pem
+secrets/
+
+# ---- Data / runtime ----
+data/cache/
+data/runs/
+data/downloads/
+# backend runtime state: sqlite db + auto-generated Fernet key (NEVER commit)
+var/
+apps/api/var/
+.fernet_key
+*.log
+.DS_Store
+coverage/
+htmlcov/
+.coverage
+
+# ---- Editor ----
+.vscode/
+.idea/
+*.swp

@@ -1,0 +1,220 @@
+{
+  "slug": "business-strategy",
+  "name": "Business Strategy — Case Reasoning",
+  "domain": "business",
+  "description": "Original short business-strategy cases. Each item presents a compact company situation with data and asks for a prioritized recommendation. Answers are scored by rubric on correctness of reasoning, structure, explicit tradeoffs, and actionability.",
+  "task_type": "open",
+  "scoring_type": "rubric",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "",
+  "config": {
+    "dimensions": [
+      "correctness",
+      "structure",
+      "tradeoffs",
+      "actionability"
+    ],
+    "threshold": 0.6
+  },
+  "items": [
+    {
+      "external_id": "bstrat-001",
+      "prompt": "A B2B SaaS company has 1,200 customers paying an average of $400/month. Gross monthly churn is 4% (48 logos/month). Sales acquires ~60 new logos/month at a customer acquisition cost (CAC) of $6,000. Gross margin is 80%. The CEO wants to double net-new revenue growth within two quarters and is deciding between (a) hiring three more sales reps, (b) funding a customer-success and retention program aimed at cutting churn to 2%, or (c) a price increase of 10% on renewals. Give a prioritized recommendation. State which lever you would pull first and why, quantify the likely impact on revenue and net revenue retention where you can, name the key metric you would track, and call out the main risk and one tradeoff of your choice.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "churn",
+          "retention",
+          "revenue",
+          "cac",
+          "ltv",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "net revenue retention"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bstrat-002",
+      "prompt": "A regional grocery chain with 40 stores is losing share to a discounter that just opened 8 locations in its market. Same-store sales are down 6% year over year, and foot traffic is down 9% while average basket size is up 3%. Management proposes three options: (a) match the discounter on price across 500 key items, (b) invest in a loyalty app and personalized promotions, or (c) expand fresh/prepared-food sections to differentiate. Recommend a prioritized course of action. Explain your reasoning from the data, quantify or bound the margin risk of price matching, identify the single most important metric to monitor, and state the main tradeoff you are accepting.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "traffic",
+          "basket",
+          "margin",
+          "differentiation",
+          "price",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "loyalty"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bstrat-003",
+      "prompt": "A direct-to-consumer coffee subscription startup has 20,000 active subscribers at $30/month. Month-1 churn is 25% but stabilizes to 5%/month after month 3. CAC is $45 and paid ads drive 70% of signups. Blended gross margin is 55%. Cash runway is 9 months. The founder wants to scale ad spend 3x. As an advisor, give a prioritized recommendation on whether to scale spend now or fix something first. Compute an approximate LTV and payback period, explain why early churn matters, name the metric that should gate the decision to scale, and note the key risk and one tradeoff.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "churn",
+          "ltv",
+          "cac",
+          "payback",
+          "runway",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "cohort"
+        ]
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "bstrat-004",
+      "prompt": "A mid-market manufacturer sells through distributors at 22% gross margin. A large retailer offers a direct private-label contract that would add 30% to unit volume but at 12% gross margin and requires exclusivity that would anger three existing distributors representing 25% of current revenue. Give a prioritized recommendation on whether to take the contract, decline it, or negotiate. Reason about the revenue and margin math, channel conflict risk, the key metric to evaluate the deal on, and the central tradeoff between volume and margin.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "margin",
+          "volume",
+          "revenue",
+          "channel conflict",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "exclusivity",
+          "distributor"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bstrat-005",
+      "prompt": "A city bike-share operator runs 3,000 bikes. Utilization averages 2.1 trips/bike/day at $2.50/trip. Operating cost is $4.20/bike/day (rebalancing, maintenance, depreciation). The operator is unprofitable and considers: (a) raising price to $3.25/trip, (b) cutting the fleet by 20% in low-use zones, or (c) adding e-bikes at higher price and higher cost. Recommend a prioritized plan to reach breakeven. Show the per-bike unit economics, estimate the effect of each lever, identify the metric that determines profitability, and state the main demand risk and one tradeoff.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "utilization",
+          "unit economics",
+          "cost",
+          "price",
+          "breakeven",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "demand"
+        ]
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "bstrat-006",
+      "prompt": "A profitable accounting firm (80 staff, $18M revenue) is deciding whether to build an in-house AI document-review tool, buy a vendor tool at $200k/year, or keep manual review. Manual review costs roughly $1.4M/year in staff hours and has a 3% error rate that occasionally triggers client rework. Give a prioritized build-vs-buy recommendation. Weigh cost, speed to value, and risk; quantify the potential savings; name the metric you would use to judge success after 6 months; and state the key risk and one tradeoff.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "build",
+          "buy",
+          "cost",
+          "savings",
+          "error rate",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "roi"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bstrat-007",
+      "prompt": "A neighborhood restaurant is at 90% seat occupancy on weekends but 35% on weekdays. Food cost is 32% of revenue and labor is 30%. The owner wants to grow profit and considers: (a) launching weekday lunch delivery via a third-party app taking 25% commission, (b) a weekday happy-hour promotion, or (c) raising weekend prices 8%. Give a prioritized recommendation. Reason about contribution margin under the delivery commission, the weekday vs weekend dynamics, the metric to track, and the main risk plus one tradeoff.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "occupancy",
+          "contribution margin",
+          "commission",
+          "revenue",
+          "cost",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff"
+        ]
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "bstrat-008",
+      "prompt": "A mobile game studio's flagship title generates $500k/month from 200,000 monthly active users; ARPU is $2.50 and day-30 retention is 12%. A new competitor launched and the studio's user acquisition cost rose from $1.80 to $3.10 per install. The studio can (a) pour budget into UA to defend volume, (b) invest in live-ops and content to raise retention and ARPU, or (c) start building a second title. Recommend a prioritized strategy. Explain why retention drives LTV, quantify the UA payback problem, name the key metric to watch, and state the main risk and one tradeoff.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "retention",
+          "arpu",
+          "ltv",
+          "user acquisition",
+          "revenue",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "live-ops"
+        ]
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "bstrat-009",
+      "prompt": "A 15-person B2B startup sells a $12k/year product. It has strong inbound demand (300 qualified leads/month) but only closes 4%, and sales-cycle length is 90 days. The founders debate whether to (a) hire two more sales reps, (b) invest in sales enablement and a better demo/trial to lift conversion, or (c) narrow targeting to a single vertical. Give a prioritized recommendation. Reason about where the funnel is leaking, quantify the revenue upside of a conversion improvement vs. adding headcount, name the metric to track, and state the key risk and one tradeoff.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "conversion",
+          "funnel",
+          "sales cycle",
+          "revenue",
+          "leads",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "vertical"
+        ]
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "bstrat-010",
+      "prompt": "An e-commerce apparel brand does $40M/year revenue with a 35% return rate that costs 15% of revenue in reverse-logistics and lost margin. Repeat-purchase rate is 28%. Leadership can invest in (a) better sizing/fit technology to cut returns, (b) a loyalty program to lift repeat purchases, or (c) international expansion. Give a prioritized recommendation. Quantify the profit impact of cutting returns vs. lifting repeat rate, explain the interaction between returns and customer lifetime value, name the metric to monitor, and state the main risk and one tradeoff.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "returns",
+          "repeat purchase",
+          "margin",
+          "revenue",
+          "lifetime value",
+          "prioritize",
+          "metric",
+          "risk",
+          "tradeoff",
+          "cost"
+        ]
+      },
+      "difficulty": "medium"
+    }
+  ]
+}

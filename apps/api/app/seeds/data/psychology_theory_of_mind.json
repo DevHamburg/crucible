@@ -1,0 +1,21 @@
+{
+  "slug": "theory-of-mind",
+  "name": "Theory of Mind — False Belief",
+  "domain": "psychology",
+  "description": "Original false-belief and perspective-taking scenarios in the style of ToMBench/SocialIQa. Tests whether a model tracks other agents' beliefs.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://github.com/zhchen18/ToMBench",
+  "config": {},
+  "items": [
+    { "external_id": "tom1", "prompt": "Sally puts her ball in a basket and leaves the room. While she is gone, Anne moves the ball to a box. When Sally returns, where will she look for her ball first?\nA) The basket\nB) The box\nC) Under the bed\nD) Outside\nAnswer with the letter.", "input": { "choices": ["The basket", "The box", "Under the bed", "Outside"] }, "reference": { "answer": "A" }, "difficulty": "easy" },
+    { "external_id": "tom2", "prompt": "Tom sees his mom hide a chocolate in the green cupboard. Tom leaves. His sister moves it to the red drawer. Tom's mom did not see this. Where does Tom's mom think the chocolate is?\nA) Red drawer\nB) Green cupboard\nC) She has no idea\nD) In the fridge\nAnswer with the letter.", "input": { "choices": ["Red drawer", "Green cupboard", "She has no idea", "In the fridge"] }, "reference": { "answer": "B" }, "difficulty": "medium" },
+    { "external_id": "tom3", "prompt": "A box labeled 'crayons' actually contains candles. Before opening it, what will a child who has never seen inside expect it to contain?\nA) Candles\nB) Crayons\nC) Nothing\nD) Coins\nAnswer with the letter.", "input": { "choices": ["Candles", "Crayons", "Nothing", "Coins"] }, "reference": { "answer": "B" }, "difficulty": "easy" },
+    { "external_id": "tom4", "prompt": "Maria tells Lena she loves her gift, but privately thinks it is ugly and later returns it. Which best describes Maria's true feeling about the gift?\nA) She loves it\nB) She dislikes it\nC) She is indifferent\nD) She wants another one\nAnswer with the letter.", "input": { "choices": ["She loves it", "She dislikes it", "She is indifferent", "She wants another one"] }, "reference": { "answer": "B" }, "difficulty": "medium" },
+    { "external_id": "tom5", "prompt": "John thinks Mary believes the meeting is at 3pm, but Mary actually knows it was moved to 4pm. John did not hear about the change. What time does John think the meeting is?\nA) 3pm\nB) 4pm\nC) He is unsure\nD) 5pm\nAnswer with the letter.", "input": { "choices": ["3pm", "4pm", "He is unsure", "5pm"] }, "reference": { "answer": "A" }, "difficulty": "hard" },
+    { "external_id": "tom6", "prompt": "A player fakes a pass to the left so the defender moves left, then goes right. Why did the player fake the pass?\nA) To make the defender believe they would go left\nB) Because they were confused\nC) To pass to the left\nD) To stop playing\nAnswer with the letter.", "input": { "choices": ["To make the defender believe they would go left", "Because they were confused", "To pass to the left", "To stop playing"] }, "reference": { "answer": "A" }, "difficulty": "medium" },
+    { "external_id": "tom7", "prompt": "Ravi borrows Ana's umbrella and returns it broken without telling her. Ana grabs the umbrella on a rainy day expecting it to work. What does Ana believe about the umbrella?\nA) That it is broken\nB) That it works\nC) That it is lost\nD) That it is new\nAnswer with the letter.", "input": { "choices": ["That it is broken", "That it works", "That it is lost", "That it is new"] }, "reference": { "answer": "B" }, "difficulty": "medium" },
+    { "external_id": "tom8", "prompt": "Two coworkers, Sam and Priya, both saw the boss put the keys in the top drawer. Sam later secretly moves them to his bag while Priya is away. Where does Priya think the keys are?\nA) In Sam's bag\nB) In the top drawer\nC) With the boss\nD) Lost\nAnswer with the letter.", "input": { "choices": ["In Sam's bag", "In the top drawer", "With the boss", "Lost"] }, "reference": { "answer": "B" }, "difficulty": "medium" }
+  ]
+}

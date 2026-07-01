@@ -1,0 +1,19 @@
+{
+  "slug": "marketing-copy",
+  "name": "Marketing Copy — Generation Quality",
+  "domain": "marketing",
+  "description": "Open-ended marketing copy generation scored by an LLM judge on correctness, clarity, persuasion and actionability. Original briefs.",
+  "task_type": "open",
+  "scoring_type": "rubric",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "",
+  "config": { "dimensions": ["correctness", "clarity", "persuasion", "actionability"], "threshold": 0.6 },
+  "items": [
+    { "external_id": "mk1", "prompt": "Write a 3-sentence launch announcement for 'Crucible', an AI model benchmarking platform for ML engineers. Emphasize rigor, multi-model comparison, and safety testing. Avoid hype words like 'revolutionary'.", "reference": { "keywords": ["benchmark", "compare", "models", "safety", "engineers", "rigor", "evaluate"] }, "difficulty": "medium" },
+    { "external_id": "mk2", "prompt": "Write a cold email (under 120 words) to a skeptical CTO to book a demo of an AI evaluation platform. Include a clear subject line and one specific value proposition.", "reference": { "keywords": ["subject", "demo", "evaluate", "cost", "compare", "time", "value"] }, "difficulty": "medium" },
+    { "external_id": "mk3", "prompt": "Draft 3 distinct value propositions for a team productivity app, each targeting a different segment (startups, enterprises, freelancers). One line each.", "reference": { "keywords": ["startup", "enterprise", "freelancer", "productivity", "team", "save time"] }, "difficulty": "medium" },
+    { "external_id": "mk4", "prompt": "Write an SEO-friendly product description (about 60 words) for noise-cancelling headphones aimed at remote workers. Mention one concrete benefit and a subtle call to action.", "reference": { "keywords": ["noise", "focus", "remote", "battery", "comfort", "call", "buy"] }, "difficulty": "easy" },
+    { "external_id": "mk5", "prompt": "Create a punchy tagline and a one-paragraph elevator pitch for a budgeting app for students. Keep the tone friendly and trustworthy.", "reference": { "keywords": ["budget", "student", "save", "money", "simple", "track", "trust"] }, "difficulty": "easy" },
+    { "external_id": "mk6", "prompt": "Write a LinkedIn post (under 150 words) announcing that your SaaS reached 10,000 users. Make it credible, gracious to the team, and include one lesson learned.", "reference": { "keywords": ["users", "team", "grateful", "lesson", "growth", "customers", "learned"] }, "difficulty": "medium" }
+  ]
+}

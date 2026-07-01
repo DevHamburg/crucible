@@ -1,0 +1,191 @@
+{
+  "slug": "business-knowledge",
+  "name": "Business Knowledge",
+  "domain": "business",
+  "description": "Original MMLU-business-style multiple-choice questions spanning management, financial accounting, microeconomics, and marketing fundamentals. Each item has exactly four options and one unambiguous correct answer.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://huggingface.co/datasets/cais/mmlu",
+  "config": {
+    "scorer": "exact_letter"
+  },
+  "items": [
+    {
+      "external_id": "bk-001",
+      "prompt": "In accounting, the fundamental balance sheet equation states that Assets equal which of the following?\n\nA. Liabilities minus Owner's Equity\nB. Liabilities plus Owner's Equity\nC. Revenue minus Expenses\nD. Owner's Equity minus Liabilities\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Liabilities minus Owner's Equity",
+          "Liabilities plus Owner's Equity",
+          "Revenue minus Expenses",
+          "Owner's Equity minus Liabilities"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "bk-002",
+      "prompt": "A firm operating in a perfectly competitive market maximizes profit by producing the quantity at which:\n\nA. Marginal revenue equals marginal cost\nB. Total revenue is maximized\nC. Average total cost is minimized\nD. Price equals average fixed cost\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Marginal revenue equals marginal cost",
+          "Total revenue is maximized",
+          "Average total cost is minimized",
+          "Price equals average fixed cost"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "bk-003",
+      "prompt": "In marketing, the classic \"4 Ps\" of the marketing mix consist of Product, Price, Place, and which of the following?\n\nA. Promotion\nB. People\nC. Positioning\nD. Packaging\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Promotion",
+          "People",
+          "Positioning",
+          "Packaging"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "bk-004",
+      "prompt": "Under the double-entry bookkeeping system, when a company purchases equipment for cash, the effect on the accounting records is:\n\nA. One asset account increases and another asset account decreases\nB. An asset increases and a liability increases\nC. An asset increases and owner's equity increases\nD. An expense increases and a liability decreases\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "One asset account increases and another asset account decreases",
+          "An asset increases and a liability increases",
+          "An asset increases and owner's equity increases",
+          "An expense increases and a liability decreases"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bk-005",
+      "prompt": "The price elasticity of demand for a good is measured as -2.5. This means demand for the good is:\n\nA. Perfectly inelastic\nB. Unit elastic\nC. Inelastic\nD. Elastic\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Perfectly inelastic",
+          "Unit elastic",
+          "Inelastic",
+          "Elastic"
+        ]
+      },
+      "reference": {
+        "answer": "D"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bk-006",
+      "prompt": "According to Maslow's hierarchy of needs, which category of needs must generally be satisfied before an individual is motivated primarily by esteem needs?\n\nA. Self-actualization needs\nB. Physiological needs only\nC. Social (belonging) needs\nD. Transcendence needs\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Self-actualization needs",
+          "Physiological needs only",
+          "Social (belonging) needs",
+          "Transcendence needs"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bk-007",
+      "prompt": "A company reports net credit sales of $600,000 and an average accounts receivable balance of $50,000 for the year. What is its accounts receivable turnover ratio?\n\nA. 8 times\nB. 12 times\nC. 6 times\nD. 0.083 times\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "8 times",
+          "12 times",
+          "6 times",
+          "0.083 times"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bk-008",
+      "prompt": "In cost accounting, a cost that remains constant in total regardless of changes in the level of production within the relevant range is best described as a:\n\nA. Variable cost\nB. Marginal cost\nC. Fixed cost\nD. Opportunity cost\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Variable cost",
+          "Marginal cost",
+          "Fixed cost",
+          "Opportunity cost"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "bk-009",
+      "prompt": "A product has a selling price of $40 per unit and variable costs of $24 per unit. If fixed costs are $80,000, how many units must be sold to break even?\n\nA. 2,000 units\nB. 3,333 units\nC. 5,000 units\nD. 3,200 units\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "2,000 units",
+          "3,333 units",
+          "5,000 units",
+          "3,200 units"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "bk-010",
+      "prompt": "In Michael Porter's Five Forces framework, which of the following is NOT one of the five competitive forces shaping industry structure?\n\nA. Threat of new entrants\nB. Bargaining power of suppliers\nC. Government regulation\nD. Threat of substitute products\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Threat of new entrants",
+          "Bargaining power of suppliers",
+          "Government regulation",
+          "Threat of substitute products"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "bk-011",
+      "prompt": "When a central bank raises the reserve requirement ratio for commercial banks, the most likely immediate effect on the economy is:\n\nA. An increase in the money supply\nB. A decrease in the money supply\nC. A decrease in market interest rates\nD. No change in the lending capacity of banks\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "An increase in the money supply",
+          "A decrease in the money supply",
+          "A decrease in market interest rates",
+          "No change in the lending capacity of banks"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "hard"
+    }
+  ]
+}

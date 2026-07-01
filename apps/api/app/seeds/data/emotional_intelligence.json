@@ -1,0 +1,191 @@
+{
+  "slug": "emotional-intelligence",
+  "name": "Emotional Intelligence — Situations",
+  "domain": "psychology",
+  "description": "Original EmoBench-style emotional intelligence benchmark. Each item presents a social or emotional situation and asks for either the most emotionally intelligent response or the emotion a person is most likely feeling. Four options, exactly one best answer. Inspired by the EmoBench dataset but all items are original.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://huggingface.co/datasets/SahandSab/EmoBench",
+  "config": {
+    "scorer": "letter_match"
+  },
+  "items": [
+    {
+      "external_id": "ei-001",
+      "difficulty": "easy",
+      "prompt": "Maya spent three weeks preparing a presentation for her team. Just before she begins, her manager announces that the meeting is cancelled and the project has been handed to another department without explanation. What is Maya most likely feeling?\nA) Relief\nB) Frustration and disappointment\nC) Gratitude\nD) Amusement\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Relief",
+          "Frustration and disappointment",
+          "Gratitude",
+          "Amusement"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ei-002",
+      "difficulty": "easy",
+      "prompt": "Daniel's close friend calls him, voice shaking, to say she just failed an important exam she had studied hard for. What is the most emotionally intelligent thing for Daniel to say first?\nA) \"At least it's just one exam, it's not a big deal.\"\nB) \"You should have studied differently; here's what you did wrong.\"\nC) \"That sounds really painful after all the work you put in. I'm here for you.\"\nD) \"Well, everyone fails sometimes, so don't worry about it.\"\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "\"At least it's just one exam, it's not a big deal.\"",
+          "\"You should have studied differently; here's what you did wrong.\"",
+          "\"That sounds really painful after all the work you put in. I'm here for you.\"",
+          "\"Well, everyone fails sometimes, so don't worry about it.\""
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      }
+    },
+    {
+      "external_id": "ei-003",
+      "difficulty": "medium",
+      "prompt": "At a dinner party, Leah notices her friend Sam suddenly go quiet and stare at his plate after another guest jokingly mentions Sam's recent job loss. What is the most emotionally intelligent way for Leah to respond?\nA) Loudly change the subject to something neutral so the moment passes, then check in with Sam privately later.\nB) Point out to the group that the joke was hurtful and demand the guest apologize on the spot.\nC) Laugh along with the joke so Sam doesn't feel singled out.\nD) Ask Sam directly in front of everyone how the job search is going.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Loudly change the subject to something neutral so the moment passes, then check in with Sam privately later.",
+          "Point out to the group that the joke was hurtful and demand the guest apologize on the spot.",
+          "Laugh along with the joke so Sam doesn't feel singled out.",
+          "Ask Sam directly in front of everyone how the job search is going."
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      }
+    },
+    {
+      "external_id": "ei-004",
+      "difficulty": "medium",
+      "prompt": "Tom's teenage daughter slams her door after he reminds her about chores. A moment later he hears quiet crying, not angry shouting. Which interpretation best reflects emotional insight into what is happening?\nA) She is manipulating him to get out of doing chores.\nB) The chores reminder likely touched something else she is already upset about; the anger is masking hurt or stress.\nC) She is simply being disrespectful and needs stricter discipline.\nD) The crying is unrelated and he should ignore it entirely.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "She is manipulating him to get out of doing chores.",
+          "The chores reminder likely touched something else she is already upset about; the anger is masking hurt or stress.",
+          "She is simply being disrespectful and needs stricter discipline.",
+          "The crying is unrelated and he should ignore it entirely."
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ei-005",
+      "difficulty": "easy",
+      "prompt": "Priya receives a surprise message that she has been accepted into the graduate program she thought was far out of her reach. What emotion is she most likely to feel in that first moment?\nA) Boredom\nB) Elation and disbelief\nC) Resentment\nD) Indifference\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Boredom",
+          "Elation and disbelief",
+          "Resentment",
+          "Indifference"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ei-006",
+      "difficulty": "medium",
+      "prompt": "A coworker, Raj, keeps taking credit in meetings for ideas that Elena originally proposed. Elena feels increasingly angry but values the working relationship. What is the most emotionally intelligent way for her to address it?\nA) Say nothing and hope Raj notices on his own.\nB) Call him out publicly in the next meeting to embarrass him as he embarrassed her.\nC) Speak with Raj privately, describe specifically what she observed and how it affected her, and ask to be credited going forward.\nD) Start taking credit for Raj's ideas to make things even.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Say nothing and hope Raj notices on his own.",
+          "Call him out publicly in the next meeting to embarrass him as he embarrassed her.",
+          "Speak with Raj privately, describe specifically what she observed and how it affected her, and ask to be credited going forward.",
+          "Start taking credit for Raj's ideas to make things even."
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      }
+    },
+    {
+      "external_id": "ei-007",
+      "difficulty": "hard",
+      "prompt": "Nadia's brother tells her, with a bright smile, that he has decided to drop out of medical school to become a musician, and adds \"I've never felt so sure about anything.\" But he keeps glancing away and his voice tightens when he says it. Considering both his words and his nonverbal cues, what is he most likely feeling underneath?\nA) Pure, uncomplicated confidence with no doubt at all.\nB) Genuine excitement mixed with underlying anxiety and a need for reassurance.\nC) Complete indifference to the decision.\nD) Anger at Nadia for not congratulating him sooner.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Pure, uncomplicated confidence with no doubt at all.",
+          "Genuine excitement mixed with underlying anxiety and a need for reassurance.",
+          "Complete indifference to the decision.",
+          "Anger at Nadia for not congratulating him sooner."
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ei-008",
+      "difficulty": "hard",
+      "prompt": "Marcus apologizes to his partner for forgetting their anniversary. His partner says \"It's fine, really, don't worry about it,\" but says it flatly, avoids eye contact, and becomes noticeably distant for the rest of the evening. What is the most emotionally intelligent conclusion and next step for Marcus?\nA) Take the words at face value and consider the matter fully resolved.\nB) Recognize the words and behavior conflict; gently acknowledge that his partner may still be hurt and invite them to talk about how they really feel.\nC) Get defensive because his partner said it was fine, so any lingering upset is unfair.\nD) Buy an expensive gift immediately to end the tension without discussing it.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Take the words at face value and consider the matter fully resolved.",
+          "Recognize the words and behavior conflict; gently acknowledge that his partner may still be hurt and invite them to talk about how they really feel.",
+          "Get defensive because his partner said it was fine, so any lingering upset is unfair.",
+          "Buy an expensive gift immediately to end the tension without discussing it."
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ei-009",
+      "difficulty": "medium",
+      "prompt": "During a group project, one member, Ben, has been unusually withdrawn and missing deadlines. When the team lead, Aisha, learns Ben's father is seriously ill, what is the most emotionally intelligent response?\nA) Remove Ben from the project so he doesn't drag the team down.\nB) Privately express empathy, ask what support he needs, and work with the team to redistribute his tasks temporarily.\nC) Remind him firmly that personal problems shouldn't affect work.\nD) Tell the whole group about his father's illness so they understand his behavior.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Remove Ben from the project so he doesn't drag the team down.",
+          "Privately express empathy, ask what support he needs, and work with the team to redistribute his tasks temporarily.",
+          "Remind him firmly that personal problems shouldn't affect work.",
+          "Tell the whole group about his father's illness so they understand his behavior."
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ei-010",
+      "difficulty": "hard",
+      "prompt": "Sofia gets a long-awaited promotion on the same day her best friend, Kira, is laid off. Kira congratulates Sofia warmly and insists they celebrate. Sofia feels a confusing mix of emotions. Which combination best captures what Sofia is most likely experiencing?\nA) Pure joy with no complications.\nB) Only guilt, with no happiness about her own success.\nC) Happiness about her promotion tangled with guilt and worry for Kira, making it hard to fully enjoy the moment.\nD) Annoyance that Kira is making the day about herself.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Pure joy with no complications.",
+          "Only guilt, with no happiness about her own success.",
+          "Happiness about her promotion tangled with guilt and worry for Kira, making it hard to fully enjoy the moment.",
+          "Annoyance that Kira is making the day about herself."
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      }
+    },
+    {
+      "external_id": "ei-011",
+      "difficulty": "medium",
+      "prompt": "A new employee, Jonas, gives a suggestion in a meeting and it is immediately dismissed by a senior colleague with a curt \"That won't work here.\" Jonas falls silent for the rest of the meeting. Later his manager wants to help him stay engaged. What is the most emotionally intelligent approach?\nA) Tell Jonas he needs thicker skin if he wants to survive in the company.\nB) Ignore it, since being shut down is a normal part of work.\nC) Afterward, acknowledge to Jonas that the dismissal was abrupt, affirm that his input is valued, and encourage him to keep contributing.\nD) Publicly overrule the senior colleague in the next meeting to defend Jonas.\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Tell Jonas he needs thicker skin if he wants to survive in the company.",
+          "Ignore it, since being shut down is a normal part of work.",
+          "Afterward, acknowledge to Jonas that the dismissal was abrupt, affirm that his input is valued, and encourage him to keep contributing.",
+          "Publicly overrule the senior colleague in the next meeting to defend Jonas."
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      }
+    }
+  ]
+}

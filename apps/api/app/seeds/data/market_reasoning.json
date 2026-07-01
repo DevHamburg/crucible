@@ -1,0 +1,230 @@
+{
+  "slug": "market-reasoning",
+  "name": "Market Reasoning — Risk Awareness",
+  "domain": "trading",
+  "description": "Open-ended trading and market reasoning tasks with no ground-truth P&L. Each item asks the model to reason through a market scenario and is scored by rubric on correctness, risk awareness, reasoning quality, and clarity. Strong answers explicitly quantify or bound risk, size positions sensibly, and acknowledge uncertainty rather than predicting outcomes.",
+  "task_type": "open",
+  "scoring_type": "rubric",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "",
+  "config": {
+    "dimensions": [
+      "correctness",
+      "risk_awareness",
+      "reasoning",
+      "clarity"
+    ],
+    "threshold": 0.6
+  },
+  "items": [
+    {
+      "external_id": "mr-position-sizing-01",
+      "prompt": "You manage a $250,000 discretionary account and want to take a long position in a single mid-cap stock currently trading at $40. Your stop-loss idea is at $34, and the stock's average daily move is about 3%. You are comfortable losing at most 1% of the account on this trade if the stop is hit. Walk through how you would size this position, what risk-per-share and total dollar risk you are accepting, and which risks (gap risk, slippage, correlation with the rest of the book, liquidity) could make your realized loss larger than planned. State any assumptions.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "position size",
+          "risk per share",
+          "stop-loss",
+          "drawdown",
+          "gap risk",
+          "slippage",
+          "liquidity",
+          "correlation",
+          "uncertainty"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mr-vol-regime-02",
+      "prompt": "Implied volatility on a broad equity index has collapsed to the 5th percentile of its two-year range, and realized volatility is even lower. A colleague argues 'volatility is cheap, so we should just buy options and wait for a spike.' Critique this reasoning. Discuss why low implied volatility is not automatically a buy signal, the cost of carry / theta decay while waiting, the risk of volatility staying low or grinding lower, and how you would structure or size such a trade to survive being early. Be explicit about what could go wrong.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "implied volatility",
+          "realized volatility",
+          "theta",
+          "carry",
+          "position size",
+          "drawdown",
+          "uncertainty",
+          "hedge",
+          "convexity"
+        ]
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "mr-earnings-gap-03",
+      "prompt": "A stock you hold reports earnings tomorrow after the close. Options markets imply roughly a 9% move, but you have a strong fundamental view that the report will be good. You are considering adding to the position before the print. Reason through this decision: quantify the potential downside from an adverse gap, explain why 'high conviction' does not reduce the size of the tail risk, and describe hedging or sizing alternatives (reducing size, buying puts, spreads, waiting until after the report) and their trade-offs. Do not predict the outcome; focus on managing the risk.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "gap risk",
+          "implied move",
+          "volatility",
+          "hedge",
+          "position size",
+          "tail risk",
+          "drawdown",
+          "uncertainty",
+          "asymmetry"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mr-leverage-margin-04",
+      "prompt": "A trader runs a $100,000 futures account at 4x notional leverage in a strategy with about 20% annualized volatility at 1x. Explain how leverage scales both expected return and volatility, estimate the leveraged annualized volatility and a rough worst-case daily drawdown, and discuss margin-call and forced-liquidation risk during a volatility spike. Recommend what a risk-aware trader should monitor and how they might de-lever. State the assumptions behind any numbers.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "leverage",
+          "volatility",
+          "margin",
+          "drawdown",
+          "position size",
+          "liquidation",
+          "risk of ruin",
+          "uncertainty",
+          "de-lever"
+        ]
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "mr-correlation-diversify-05",
+      "prompt": "An investor holds five technology stocks and believes they are 'diversified' because they hold five names. During a market sell-off all five fall together. Explain why the number of positions is a poor measure of diversification, how correlation changes (often rising toward 1) in stressed markets, and what this means for the portfolio's true risk versus its apparent risk. Suggest concrete ways to measure and reduce concentration and correlation risk.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "correlation",
+          "diversification",
+          "concentration",
+          "volatility",
+          "drawdown",
+          "tail risk",
+          "hedge",
+          "uncertainty",
+          "stress"
+        ]
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "mr-stop-vs-hedge-06",
+      "prompt": "For an illiquid small-cap position, you are deciding between (a) a hard stop-loss order that sells if price drops through a level, and (b) buying protective puts as a hedge. Compare these two approaches for downside protection. Discuss gap risk and slippage on stops in illiquid names, the premium cost and expiry risk of puts, and the scenarios where each fails. Recommend how you would choose, and note that neither eliminates all risk.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "stop-loss",
+          "hedge",
+          "gap risk",
+          "slippage",
+          "liquidity",
+          "premium",
+          "drawdown",
+          "uncertainty",
+          "tail risk"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mr-kelly-sizing-07",
+      "prompt": "You have a strategy you believe has a 55% win rate with roughly symmetric win/loss sizes. A backtest suggests full-Kelly sizing would put a large fraction of capital on each trade. Explain why practitioners typically use fractional Kelly (e.g., half or quarter), how estimation error in the edge and win rate makes full Kelly dangerous, and how over-sizing interacts with drawdown and risk of ruin. Give a qualitative recommendation for how to size, and state the key uncertainties.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "kelly",
+          "position size",
+          "edge",
+          "drawdown",
+          "risk of ruin",
+          "estimation error",
+          "volatility",
+          "uncertainty",
+          "overfitting"
+        ]
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "mr-liquidity-crisis-08",
+      "prompt": "A high-yield corporate bond fund is offering an attractive yield, but you notice its holdings trade infrequently and bid-ask spreads are wide. Explain the liquidity risks specific to holding such assets, why the quoted price may overstate what you could actually sell for during stress, the danger of redemption-driven forced selling, and how a spike in volatility can cause the 'exit' to close for everyone at once. Recommend how a risk-aware investor should size and monitor this exposure.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "liquidity",
+          "bid-ask spread",
+          "volatility",
+          "drawdown",
+          "position size",
+          "redemption",
+          "tail risk",
+          "uncertainty",
+          "stress"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mr-overconfidence-backtest-09",
+      "prompt": "A quant shows you a backtest with a Sharpe ratio of 3.0 over five years and proposes going live with maximum size immediately. Reason critically about this: discuss overfitting and data-mining bias, why in-sample Sharpe overstates live performance, transaction costs and capacity, regime change, and how you would size the strategy initially given the uncertainty in its true edge. Emphasize risk-aware deployment rather than trusting the backtest.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "overfitting",
+          "sharpe",
+          "position size",
+          "regime change",
+          "transaction costs",
+          "drawdown",
+          "uncertainty",
+          "edge",
+          "out-of-sample"
+        ]
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "mr-fx-carry-10",
+      "prompt": "A carry trade borrows in a low-interest-rate currency to invest in a high-interest-rate currency, earning the interest differential. Explain the risk profile of this trade: why it is often described as 'picking up pennies in front of a steamroller,' how it can be profitable for long stretches and then suffer sudden large drawdowns when the funding currency spikes, and the role of leverage and crowded positioning. Recommend how to size and hedge such a trade, and what warning signs to watch.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "carry trade",
+          "interest differential",
+          "tail risk",
+          "leverage",
+          "drawdown",
+          "volatility",
+          "hedge",
+          "position size",
+          "uncertainty"
+        ]
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mr-single-name-concentration-11",
+      "prompt": "An employee's net worth is 70% concentrated in their own company's stock through vested equity, and they are bullish on the company. Explain the risk of this concentration, including the correlation between their human capital (salary/job) and the stock, single-name idiosyncratic risk, and why 'I know this company well' does not reduce statistical risk. Recommend a risk-aware plan to diversify over time, and discuss the trade-offs (taxes, signaling, upside forgone) of doing so.",
+      "input": {},
+      "reference": {
+        "keywords": [
+          "concentration",
+          "correlation",
+          "diversification",
+          "idiosyncratic risk",
+          "drawdown",
+          "position size",
+          "hedge",
+          "uncertainty",
+          "human capital"
+        ]
+      },
+      "difficulty": "easy"
+    }
+  ]
+}

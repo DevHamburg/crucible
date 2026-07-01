@@ -1,0 +1,191 @@
+{
+  "slug": "cognitive-biases",
+  "name": "Cognitive Biases — Identification",
+  "domain": "psychology",
+  "description": "Read a short scenario describing a decision or judgment, and identify which cognitive bias it primarily illustrates. Each item is multiple choice with four options and exactly one correct answer.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://github.com/simonmalberg/cognitive-biases-in-llms",
+  "config": {
+    "shuffle_choices": false
+  },
+  "items": [
+    {
+      "external_id": "cb-001",
+      "prompt": "A shopper sees a jacket originally marked at $400 but now on sale for $250. She buys it immediately, feeling it is a great deal, even though similar jackets elsewhere sell for $200. Her sense of value was heavily shaped by the first number she saw.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Anchoring bias\nB) Availability heuristic\nC) Sunk cost fallacy\nD) Confirmation bias\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Anchoring bias",
+          "Availability heuristic",
+          "Sunk cost fallacy",
+          "Confirmation bias"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "cb-002",
+      "prompt": "After watching several news reports about airplane crashes over the past week, Marco decides to drive 2,000 km for his vacation instead of flying, convinced that flying is far more dangerous, even though statistics show flying is much safer per kilometer.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Anchoring bias\nB) Availability heuristic\nC) Hindsight bias\nD) Sunk cost fallacy\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Anchoring bias",
+          "Availability heuristic",
+          "Hindsight bias",
+          "Sunk cost fallacy"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "cb-003",
+      "prompt": "A couple has spent $30,000 renovating a house that keeps revealing new structural problems. Even though selling now and buying elsewhere would be cheaper and less stressful, they insist on continuing because they have already invested so much money and effort.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Confirmation bias\nB) Availability heuristic\nC) Sunk cost fallacy\nD) Optimism bias\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Confirmation bias",
+          "Availability heuristic",
+          "Sunk cost fallacy",
+          "Optimism bias"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "cb-004",
+      "prompt": "An investor believes a particular company is a strong buy. She reads only analyst reports that recommend the stock and dismisses articles warning about the company's debt, interpreting every piece of news as further proof she is right.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Confirmation bias\nB) Anchoring bias\nC) Bandwagon effect\nD) Framing effect\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Confirmation bias",
+          "Anchoring bias",
+          "Bandwagon effect",
+          "Framing effect"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "cb-005",
+      "prompt": "A surgeon presents two treatment options. In the first framing she says '90% of patients survive this procedure'; in the second she says '10% of patients die from this procedure.' Patients strongly prefer the procedure when it is described in terms of survival, even though the two descriptions are numerically identical.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Sunk cost fallacy\nB) Framing effect\nC) Availability heuristic\nD) Dunning–Kruger effect\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Sunk cost fallacy",
+          "Framing effect",
+          "Availability heuristic",
+          "Dunning–Kruger effect"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cb-006",
+      "prompt": "After a startup unexpectedly collapses, a journalist writes, 'The warning signs were obvious all along; anyone could have seen this coming.' Before the collapse, however, the same journalist had praised the company as a rising star.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Confirmation bias\nB) Anchoring bias\nC) Hindsight bias\nD) Availability heuristic\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Confirmation bias",
+          "Anchoring bias",
+          "Hindsight bias",
+          "Availability heuristic"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cb-007",
+      "prompt": "A new employee completes a single week of a coding bootcamp and immediately begins correcting senior engineers, confident he now understands software architecture better than they do. He is unaware of how much he still does not know.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Dunning–Kruger effect\nB) Sunk cost fallacy\nC) Framing effect\nD) Halo effect\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Dunning–Kruger effect",
+          "Sunk cost fallacy",
+          "Framing effect",
+          "Halo effect"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cb-008",
+      "prompt": "A hiring manager notices that a candidate is exceptionally well dressed and articulate in the first minute of the interview. Based on this initial impression, she assumes the candidate is also highly competent, diligent, and honest, without any evidence for those specific traits.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Halo effect\nB) Anchoring bias\nC) Availability heuristic\nD) Loss aversion\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Halo effect",
+          "Anchoring bias",
+          "Availability heuristic",
+          "Loss aversion"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cb-009",
+      "prompt": "A trader feels the pain of losing $100 far more intensely than the pleasure of gaining $100. As a result, he refuses to sell a declining stock to avoid 'locking in' the loss, holding it long past the point of rational exit purely to avoid the feeling of losing.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Sunk cost fallacy\nB) Loss aversion\nC) Confirmation bias\nD) Bandwagon effect\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Sunk cost fallacy",
+          "Loss aversion",
+          "Confirmation bias",
+          "Bandwagon effect"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "cb-010",
+      "prompt": "A voter privately doubts a policy, but once she notices that most of her colleagues and neighbors publicly support it, she changes her stated position to match theirs, reasoning that so many people cannot all be wrong.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Bandwagon effect\nB) Framing effect\nC) Hindsight bias\nD) Anchoring bias\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Bandwagon effect",
+          "Framing effect",
+          "Hindsight bias",
+          "Anchoring bias"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cb-011",
+      "prompt": "A project manager estimates that a software release will be finished in three weeks. Although nearly every past project of similar size took at least two months, she is certain this one will go smoothly and hit the optimistic deadline. She systematically underestimates the time, costs, and risks involved.\n\nWhich cognitive bias does this scenario primarily illustrate?\nA) Planning fallacy\nB) Availability heuristic\nC) Halo effect\nD) Confirmation bias\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Planning fallacy",
+          "Availability heuristic",
+          "Halo effect",
+          "Confirmation bias"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "hard"
+    }
+  ]
+}

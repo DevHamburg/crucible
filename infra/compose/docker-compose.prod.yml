@@ -1,0 +1,136 @@
+# Crucible — production stack (runs NEXT TO hypexio on the same Hetzner server).
+#
+# It is a self-contained compose project under /opt/crucible/ with its OWN
+# Postgres + Redis, so it never touches hypexio's data. Its api/web containers
+# additionally join hypexio's Caddy network (EDGE_NETWORK, external) so the
+# single shared Caddy can reverse-proxy bench.hypexio.com to them.
+#
+# Images: GHCR, pushed by .github/workflows/deploy.yml as
+#   ghcr.io/<owner>/<repo>-api:<sha>  and  -web:<sha>
+# The worker reuses the api image (same codebase, arq command).
+
+x-api-env: &api-env
+  CRUCIBLE_ENV: production
+  DATABASE_URL: postgresql+asyncpg://crucible:${POSTGRES_PASSWORD:-crucible}@crucible-db:5432/crucible
+  REDIS_URL: redis://crucible-redis:6379/0
+  USE_TASK_QUEUE: "true"
+  SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+  ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
+  ALLOW_ANONYMOUS: ${ALLOW_ANONYMOUS:-true}
+  FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-https://bench.hypexio.com}
+  FIRST_ADMIN_EMAIL: ${FIRST_ADMIN_EMAIL:-admin@crucible.local}
+  FIRST_ADMIN_PASSWORD: ${FIRST_ADMIN_PASSWORD:-admin}
+  GLOBAL_RUN_BUDGET_USD: ${GLOBAL_RUN_BUDGET_USD:-25}
+  MAX_CONCURRENCY: ${MAX_CONCURRENCY:-8}
+  JUDGE_MODEL: ${JUDGE_MODEL:-mock/judge-pro}
+  REDTEAM_ATTACKER_MODEL: ${REDTEAM_ATTACKER_MODEL:-mock/redteam-adaptive}
+  # optional provider keys (server-level fallback)
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+  MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+  GROQ_API_KEY: ${GROQ_API_KEY:-}
+
+services:
+  crucible-db:
+    image: postgres:16-alpine
+    container_name: crucible-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crucible
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crucible}
+      POSTGRES_DB: crucible
+    volumes:
+      - crucible_pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crucible"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  crucible-redis:
+    image: redis:7-alpine
+    container_name: crucible-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  crucible-api:
+    image: ${GHCR_REGISTRY:-ghcr.io}/${GHCR_REPO}-api:${IMAGE_TAG:-latest}
+    container_name: crucible-api
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+    depends_on:
+      crucible-db:
+        condition: service_healthy
+      crucible-redis:
+        condition: service_healthy
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    networks:
+      - internal
+      - edge
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+
+  crucible-worker:
+    image: ${GHCR_REGISTRY:-ghcr.io}/${GHCR_REPO}-api:${IMAGE_TAG:-latest}
+    container_name: crucible-worker
+    restart: unless-stopped
+    environment:
+      <<: *api-env
+    depends_on:
+      crucible-db:
+        condition: service_healthy
+      crucible-redis:
+        condition: service_healthy
+    command: ["arq", "app.worker.arq_worker.WorkerSettings"]
+    networks:
+      - internal
+
+  crucible-web:
+    image: ${GHCR_REGISTRY:-ghcr.io}/${GHCR_REPO}-web:${IMAGE_TAG:-latest}
+    container_name: crucible-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: "0.0.0.0"
+    depends_on:
+      crucible-api:
+        condition: service_healthy
+    networks:
+      - edge
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+
+volumes:
+  crucible_pgdata:
+
+networks:
+  # private: db/redis only reachable from crucible containers
+  internal:
+    internal: true
+  # shared with hypexio's Caddy so bench.hypexio.com can be reverse-proxied.
+  # Confirm the real name with `docker network ls` (default hypexio_web) and set
+  # EDGE_NETWORK in /opt/crucible/.env if it differs.
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:-hypexio_web}

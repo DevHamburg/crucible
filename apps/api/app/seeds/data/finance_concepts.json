@@ -1,0 +1,191 @@
+{
+  "slug": "finance-concepts",
+  "name": "Finance & Markets — Concepts",
+  "domain": "trading",
+  "description": "Original multiple-choice questions on core finance and markets concepts: risk, derivatives, options greeks, portfolio theory, and market mechanics. One unambiguous correct answer per item.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "",
+  "config": {
+    "shuffle_choices": false
+  },
+  "items": [
+    {
+      "external_id": "fc-001",
+      "prompt": "An option's vega measures its sensitivity to changes in implied volatility. All else equal, which change would MOST increase a plain-vanilla option's vega?\nA) The option moving deep in-the-money\nB) Increasing the time remaining until expiration\nC) The underlying paying a large dividend\nD) The option moving deep out-of-the-money\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "The option moving deep in-the-money",
+          "Increasing the time remaining until expiration",
+          "The underlying paying a large dividend",
+          "The option moving deep out-of-the-money"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "fc-002",
+      "prompt": "Diversification in a portfolio primarily reduces which type of risk?\nA) Systematic (market) risk\nB) Unsystematic (idiosyncratic) risk\nC) Interest rate risk on the whole market\nD) Inflation risk\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Systematic (market) risk",
+          "Unsystematic (idiosyncratic) risk",
+          "Interest rate risk on the whole market",
+          "Inflation risk"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fc-003",
+      "prompt": "In the Capital Asset Pricing Model (CAPM), a stock with a beta of 1.5 is expected to:\nA) Be less volatile than the overall market\nB) Have an expected return equal to the risk-free rate\nC) Amplify market movements, rising or falling more than the market on average\nD) Have zero correlation with the market\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Be less volatile than the overall market",
+          "Have an expected return equal to the risk-free rate",
+          "Amplify market movements, rising or falling more than the market on average",
+          "Have zero correlation with the market"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fc-004",
+      "prompt": "The delta of a long European call option on a non-dividend-paying stock:\nA) Is always negative\nB) Ranges between 0 and 1\nC) Ranges between -1 and 0\nD) Is exactly 0.5 at all times\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Is always negative",
+          "Ranges between 0 and 1",
+          "Ranges between -1 and 0",
+          "Is exactly 0.5 at all times"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "fc-005",
+      "prompt": "A trader is 'short' a futures contract. This means the trader:\nA) Has agreed to buy the underlying at the contract price on the delivery date\nB) Has agreed to sell the underlying at the contract price on the delivery date\nC) Owns a call option on the underlying\nD) Has no obligation and can walk away for a premium\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Has agreed to buy the underlying at the contract price on the delivery date",
+          "Has agreed to sell the underlying at the contract price on the delivery date",
+          "Owns a call option on the underlying",
+          "Has no obligation and can walk away for a premium"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fc-006",
+      "prompt": "The Sharpe ratio of a portfolio is best described as:\nA) Total return divided by portfolio beta\nB) Excess return over the risk-free rate per unit of total volatility (standard deviation)\nC) Excess return per unit of systematic risk only\nD) The correlation between the portfolio and the market index\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Total return divided by portfolio beta",
+          "Excess return over the risk-free rate per unit of total volatility (standard deviation)",
+          "Excess return per unit of systematic risk only",
+          "The correlation between the portfolio and the market index"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "fc-007",
+      "prompt": "Under put-call parity for European options on a non-dividend-paying stock, which relationship holds (C = call price, P = put price, S = spot, K = strike, PV(K) = present value of strike)?\nA) C + P = S + PV(K)\nB) C - P = S - PV(K)\nC) C - P = PV(K) - S\nD) C + PV(K) = P + S + K\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "C + P = S + PV(K)",
+          "C - P = S - PV(K)",
+          "C - P = PV(K) - S",
+          "C + PV(K) = P + S + K"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "fc-008",
+      "prompt": "The bid-ask spread quoted by a market maker most directly represents:\nA) The commission charged by the exchange to investors\nB) The compensation and risk buffer for providing liquidity, i.e. the difference between buy and sell quotes\nC) The dividend yield of the security\nD) The margin requirement for a leveraged position\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "The commission charged by the exchange to investors",
+          "The compensation and risk buffer for providing liquidity, i.e. the difference between buy and sell quotes",
+          "The dividend yield of the security",
+          "The margin requirement for a leveraged position"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fc-009",
+      "prompt": "All else equal, the price of a plain coupon bond and market interest rates have what relationship?\nA) They move in the same direction\nB) They move in opposite directions\nC) Bond price is independent of interest rates\nD) The relationship depends only on the credit rating\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "They move in the same direction",
+          "They move in opposite directions",
+          "Bond price is independent of interest rates",
+          "The relationship depends only on the credit rating"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "fc-010",
+      "prompt": "Gamma of an option is the rate of change of delta with respect to the underlying price. For a long option position, gamma is typically largest when the option is:\nA) Deep in-the-money\nB) Deep out-of-the-money\nC) At-the-money and near expiration\nD) At-the-money with very long time to expiration\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Deep in-the-money",
+          "Deep out-of-the-money",
+          "At-the-money and near expiration",
+          "At-the-money with very long time to expiration"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "fc-011",
+      "prompt": "Two risky assets each have a positive expected return. Combining them into a portfolio reduces overall volatility the MOST when their returns are:\nA) Perfectly positively correlated (+1)\nB) Uncorrelated (0)\nC) Perfectly negatively correlated (-1)\nD) Correlation has no effect on portfolio volatility\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Perfectly positively correlated (+1)",
+          "Uncorrelated (0)",
+          "Perfectly negatively correlated (-1)",
+          "Correlation has no effect on portfolio volatility"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      },
+      "difficulty": "medium"
+    }
+  ]
+}

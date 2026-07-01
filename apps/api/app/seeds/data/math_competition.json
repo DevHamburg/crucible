@@ -1,0 +1,112 @@
+{
+  "slug": "math-competition",
+  "name": "Math Competition — Boxed Answers",
+  "domain": "logic",
+  "description": "Original competition-style math problems (algebra, combinatorics, number theory) each with a single closed-form final answer to be placed in \\boxed{}. Inspired by MATH-500.",
+  "task_type": "math",
+  "scoring_type": "math_equal",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://huggingface.co/datasets/HuggingFaceH4/MATH-500",
+  "config": {},
+  "items": [
+    {
+      "external_id": "mc-001",
+      "prompt": "Find the last two digits of $7^{2025}$. Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "7"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mc-002",
+      "prompt": "How many ordered triples of positive integers $(x, y, z)$ with $x < y < z$ satisfy $x + y + z = 20$? Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "24"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mc-003",
+      "prompt": "Two fair six-sided dice are rolled. What is the probability that the sum of the two numbers shown is a prime number? Express your answer as a common fraction and put it in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "\\frac{5}{12}"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "mc-004",
+      "prompt": "Evaluate the sum $\\displaystyle\\sum_{k=1}^{99} \\frac{1}{k(k+1)}$. Express your answer as a common fraction and put it in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "\\frac{99}{100}"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mc-005",
+      "prompt": "What is the largest integer $k$ such that $2^k$ divides $50!$? Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "47"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "mc-006",
+      "prompt": "How many distinct arrangements are there of the letters in the word MISSISSIPPI? Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "34650"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "mc-007",
+      "prompt": "Let $r$ and $s$ be the roots of $x^2 - 5x + 6 = 0$. Compute $r^3 + s^3$. Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "35"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "mc-008",
+      "prompt": "Find the last two digits of $1! + 2! + 3! + \\cdots + 100!$. Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "13"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "mc-009",
+      "prompt": "Evaluate $\\displaystyle\\sum_{k=1}^{100} \\lfloor \\sqrt{k} \\rfloor$, where $\\lfloor x \\rfloor$ denotes the greatest integer not exceeding $x$. Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "625"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "mc-010",
+      "prompt": "What is the sum of all two-digit positive integers that are divisible by 7? Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "728"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "mc-011",
+      "prompt": "When $x^{100}$ is divided by $x^2 - 1$, the remainder can be written as $ax + b$. Find $a + b$. Put your final answer in \\boxed{}.",
+      "input": {},
+      "reference": {
+        "answer": "1"
+      },
+      "difficulty": "hard"
+    }
+  ]
+}

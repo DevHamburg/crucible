@@ -1,0 +1,176 @@
+{
+  "slug": "logic-deduction",
+  "name": "Logical Deduction — Knights & Knaves",
+  "domain": "logic",
+  "description": "Logical Deduction — Knights & Knaves — auto-generated original items.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://github.com/AlphaPav/mem-kk-logic",
+  "config": {
+    "answer_format": "letter",
+    "case_sensitive": false
+  },
+  "items": [
+    {
+      "external_id": "kk-01-both-knaves",
+      "difficulty": "easy",
+      "prompt": "On the island of knights and knaves, every knight always tells the truth and every knave always lies. You meet two inhabitants, A and B. A says: \"Both of us are knaves.\" Based on this, determine what each one is.\n\nA) A is a knight and B is a knight\nB) A is a knight and B is a knave\nC) A is a knave and B is a knight\nD) A is a knave and B is a knave\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "A is a knight and B is a knight",
+          "A is a knight and B is a knave",
+          "A is a knave and B is a knight",
+          "A is a knave and B is a knave"
+        ]
+      },
+      "reference": {
+        "answer": "C"
+      }
+    },
+    {
+      "external_id": "kk-02-at-least-one-knave",
+      "difficulty": "easy",
+      "prompt": "On the island of knights and knaves, every knight always tells the truth and every knave always lies. You meet two inhabitants, A and B. A says: \"At least one of us is a knave.\" Based on this, determine what each one is.\n\nA) A is a knight and B is a knight\nB) A is a knight and B is a knave\nC) A is a knave and B is a knight\nD) A is a knave and B is a knave\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "A is a knight and B is a knight",
+          "A is a knight and B is a knave",
+          "A is a knave and B is a knight",
+          "A is a knave and B is a knave"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ld-03-golf-order",
+      "difficulty": "easy",
+      "prompt": "Four golfers finished a tournament: Amy, Ben, Carol, and Dan. The following statements are all true:\n- Dan finished ahead of Amy.\n- Carol finished behind Amy.\n- Ben finished behind Carol.\n\nWhich golfer finished last?\n\nA) Amy\nB) Ben\nC) Carol\nD) Dan\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Amy",
+          "Ben",
+          "Carol",
+          "Dan"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "kk-04-b-knight-same-type",
+      "difficulty": "medium",
+      "prompt": "On the island of knights and knaves, every knight always tells the truth and every knave always lies. You meet two inhabitants, A and B. A says: \"B is a knight.\" B says: \"A and I are of the same type.\" Based on this, determine what each one is.\n\nA) A is a knight and B is a knight\nB) A is a knight and B is a knave\nC) A is a knave and B is a knight\nD) A is a knave and B is a knave\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "A is a knight and B is a knight",
+          "A is a knight and B is a knave",
+          "A is a knave and B is a knight",
+          "A is a knave and B is a knave"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      }
+    },
+    {
+      "external_id": "kk-05-three-different-types",
+      "difficulty": "medium",
+      "prompt": "On the island of knights and knaves, every knight always tells the truth and every knave always lies. You meet three inhabitants: A, B, and C. A says: \"B is a knight.\" B says: \"C is a knave.\" C says: \"A and B are of different types.\" Based on this, determine what each one is.\n\nA) A is a knight, B is a knight, C is a knight\nB) A is a knight, B is a knight, C is a knave\nC) A is a knave, B is a knave, C is a knight\nD) A is a knight, B is a knave, C is a knave\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "A is a knight, B is a knight, C is a knight",
+          "A is a knight, B is a knight, C is a knave",
+          "A is a knave, B is a knave, C is a knight",
+          "A is a knight, B is a knave, C is a knave"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ld-06-bookshelf",
+      "difficulty": "medium",
+      "prompt": "Five books stand in a row on a shelf: a red, a green, a blue, a white, and a black book. The following statements are all true:\n- The blue book is somewhere to the right of the white book.\n- The green book is somewhere to the left of the white book.\n- The black book is the rightmost book.\n- The red book is somewhere to the left of the green book.\n\nWhich book is second from the left?\n\nA) The red book\nB) The green book\nC) The white book\nD) The blue book\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "The red book",
+          "The green book",
+          "The white book",
+          "The blue book"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "ld-07-ages",
+      "difficulty": "medium",
+      "prompt": "Five people compare their ages: Uma, Vic, Wei, Xander, and Yara. The following statements are all true:\n- Uma is older than Vic.\n- Vic is older than Wei.\n- Xander is younger than Wei.\n- Yara is older than Uma.\n\nWho is the third oldest?\n\nA) Uma\nB) Vic\nC) Wei\nD) Yara\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "Uma",
+          "Vic",
+          "Wei",
+          "Yara"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    },
+    {
+      "external_id": "kk-08-all-three-knaves",
+      "difficulty": "hard",
+      "prompt": "On the island of knights and knaves, every knight always tells the truth and every knave always lies. You meet three inhabitants: A, B, and C. A says: \"All three of us are knaves.\" B says: \"A is a knave.\" C says: \"B is a knave.\" Based on this, determine what each one is.\n\nA) A is a knave, B is a knight, C is a knave\nB) A is a knight, B is a knight, C is a knave\nC) A is a knave, B is a knave, C is a knight\nD) A is a knave, B is a knight, C is a knight\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "A is a knave, B is a knight, C is a knave",
+          "A is a knight, B is a knight, C is a knave",
+          "A is a knave, B is a knave, C is a knight",
+          "A is a knave, B is a knight, C is a knight"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      }
+    },
+    {
+      "external_id": "ld-09-car-race",
+      "difficulty": "medium",
+      "prompt": "Five vintage cars finished a race: the Ford, the Chevy, the Buick, the Dodge, and the Olds. The following statements are all true:\n- The Ford finished ahead of the Chevy.\n- The Dodge finished ahead of the Buick.\n- The Chevy finished ahead of the Dodge.\n- The Buick finished ahead of the Olds.\n\nWhich car finished last?\n\nA) The Ford\nB) The Chevy\nC) The Buick\nD) The Olds\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "The Ford",
+          "The Chevy",
+          "The Buick",
+          "The Olds"
+        ]
+      },
+      "reference": {
+        "answer": "D"
+      }
+    },
+    {
+      "external_id": "kk-10-both-knaves-chain",
+      "difficulty": "hard",
+      "prompt": "On the island of knights and knaves, every knight always tells the truth and every knave always lies. You meet three inhabitants: A, B, and C. A says: \"B and I are both knaves.\" B says: \"C is a knight.\" C says: \"A is a knave.\" Based on this, determine what each one is.\n\nA) A is a knight, B is a knight, C is a knight\nB) A is a knave, B is a knight, C is a knight\nC) A is a knave, B is a knave, C is a knight\nD) A is a knave, B is a knight, C is a knave\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "A is a knight, B is a knight, C is a knight",
+          "A is a knave, B is a knight, C is a knight",
+          "A is a knave, B is a knave, C is a knight",
+          "A is a knave, B is a knight, C is a knave"
+        ]
+      },
+      "reference": {
+        "answer": "B"
+      }
+    }
+  ]
+}

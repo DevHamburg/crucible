@@ -1,0 +1,191 @@
+{
+  "slug": "code-output-prediction",
+  "name": "Code Reasoning — Output Prediction",
+  "domain": "software",
+  "description": "Original CRUXEval-style output prediction MCQ items. Each shows a short Python function; predict the returned/printed value. Verified with CPython 3.",
+  "task_type": "mcq",
+  "scoring_type": "multiple_choice",
+  "license": "CC-BY-4.0 (original items)",
+  "source_url": "https://huggingface.co/datasets/cruxeval-org/cruxeval",
+  "config": {
+    "scoring": "exact_letter"
+  },
+  "items": [
+    {
+      "external_id": "cop-01",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    s = \"aXbXc\"\n    return s.split(\"X\")\nprint(f())\n```\n\nA) ['a', 'b', 'c']\nB) ['aXbXc']\nC) ['a', 'X', 'b', 'X', 'c']\nD) 'a b c'\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "['a', 'b', 'c']",
+          "['aXbXc']",
+          "['a', 'X', 'b', 'X', 'c']",
+          "'a b c'"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "cop-02",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    d = {}\n    for i in range(4):\n        d[i % 2] = d.get(i % 2, 0) + i\n    return d\nprint(f())\n```\n\nA) {0: 2, 1: 4}\nB) {0: 4, 1: 2}\nC) {0: 6, 1: 6}\nD) {0: 0, 1: 1, 2: 2, 3: 3}\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "{0: 2, 1: 4}",
+          "{0: 4, 1: 2}",
+          "{0: 6, 1: 6}",
+          "{0: 0, 1: 1, 2: 2, 3: 3}"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cop-03",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    nums = [3, 1, 2, 1, 3]\n    seen = []\n    for n in nums:\n        if n not in seen:\n            seen.append(n)\n    return seen\nprint(f())\n```\n\nA) [3, 1, 2]\nB) [1, 2, 3]\nC) [3, 1, 2, 1, 3]\nD) [2, 1, 3]\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "[3, 1, 2]",
+          "[1, 2, 3]",
+          "[3, 1, 2, 1, 3]",
+          "[2, 1, 3]"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "cop-04",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    text = \"hello world\"\n    return text.title()\nprint(f())\n```\n\nA) 'Hello World'\nB) 'Hello world'\nC) 'HELLO WORLD'\nD) 'hello world'\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "'Hello World'",
+          "'Hello world'",
+          "'HELLO WORLD'",
+          "'hello world'"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "cop-05",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    a = [1, 2, 3]\n    b = a\n    b.append(4)\n    return len(a)\nprint(f())\n```\n\nA) 4\nB) 3\nC) 5\nD) 1\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "4",
+          "3",
+          "5",
+          "1"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cop-06",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    result = \"\"\n    for c in \"abcabc\":\n        if c not in result:\n            result += c\n    return result\nprint(f())\n```\n\nA) 'abc'\nB) 'abcabc'\nC) 'aabbcc'\nD) 'cba'\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "'abc'",
+          "'abcabc'",
+          "'aabbcc'",
+          "'cba'"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cop-07",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    x = [i*i for i in range(5) if i % 2 == 0]\n    return x\nprint(f())\n```\n\nA) [0, 4, 16]\nB) [0, 1, 4, 9, 16]\nC) [4, 16]\nD) [0, 2, 4]\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "[0, 4, 16]",
+          "[0, 1, 4, 9, 16]",
+          "[4, 16]",
+          "[0, 2, 4]"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cop-08",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    s = \"The quick brown fox\"\n    words = s.split()\n    return \"-\".join(w[0].upper() for w in words)\nprint(f())\n```\n\nA) 'T-Q-B-F'\nB) 'TQBF'\nC) 'T-q-b-f'\nD) 'The-quick-brown-fox'\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "'T-Q-B-F'",
+          "'TQBF'",
+          "'T-q-b-f'",
+          "'The-quick-brown-fox'"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cop-09",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    d = {\"a\": 1, \"b\": 2, \"c\": 3}\n    return sorted(d.items(), key=lambda kv: -kv[1])[0][0]\nprint(f())\n```\n\nA) 'c'\nB) 'a'\nC) 3\nD) ('c', 3)\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "'c'",
+          "'a'",
+          "3",
+          "('c', 3)"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "hard"
+    },
+    {
+      "external_id": "cop-10",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    n = 5\n    total = 0\n    while n > 0:\n        total += n\n        n -= 2\n    return total\nprint(f())\n```\n\nA) 9\nB) 15\nC) 6\nD) 8\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "9",
+          "15",
+          "6",
+          "8"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "cop-11",
+      "prompt": "What does this function return?\n\n```python\ndef f():\n    lst = [[1, 2], [3, 4], [5]]\n    flat = [x for sub in lst for x in sub]\n    return flat[::-1]\nprint(f())\n```\n\nA) [5, 4, 3, 2, 1]\nB) [1, 2, 3, 4, 5]\nC) [[5], [3, 4], [1, 2]]\nD) [5, 3, 1]\n\nAnswer with the letter.",
+      "input": {
+        "choices": [
+          "[5, 4, 3, 2, 1]",
+          "[1, 2, 3, 4, 5]",
+          "[[5], [3, 4], [1, 2]]",
+          "[5, 3, 1]"
+        ]
+      },
+      "reference": {
+        "answer": "A"
+      },
+      "difficulty": "hard"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "slug": "humaneval-lite",
+  "name": "HumanEval-Lite — Function Synthesis",
+  "domain": "software",
+  "description": "Original Python function-synthesis problems in the style of HumanEval/MBPP. Execution-based scoring: the model's code must pass hidden unit tests in a sandbox.",
+  "task_type": "code",
+  "scoring_type": "code_exec",
+  "license": "MIT (original items; inspired by openai/openai_humaneval)",
+  "source_url": "https://huggingface.co/datasets/openai/openai_humaneval",
+  "config": { "timeout": 8 },
+  "items": [
+    {
+      "external_id": "he1",
+      "prompt": "Write a Python function `two_sum(nums, target)` that returns a tuple (i, j) of indices (i < j) such that nums[i] + nums[j] == target. Exactly one solution exists. Return only the function in a code block.",
+      "reference": {
+        "entry_point": "two_sum",
+        "canonical_solution": "def two_sum(nums, target):\n    seen = {}\n    for i, n in enumerate(nums):\n        if target - n in seen:\n            return (seen[target - n], i)\n        seen[n] = i\n    return None",
+        "test": "assert two_sum([2,7,11,15], 9) == (0,1)\nassert two_sum([3,2,4], 6) == (1,2)\nassert two_sum([3,3], 6) == (0,1)"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "he2",
+      "prompt": "Write a Python function `is_palindrome(s)` that returns True if the string is a palindrome ignoring case and non-alphanumeric characters, else False. Return only the function in a code block.",
+      "reference": {
+        "entry_point": "is_palindrome",
+        "canonical_solution": "def is_palindrome(s):\n    t = [c.lower() for c in s if c.isalnum()]\n    return t == t[::-1]",
+        "test": "assert is_palindrome('A man, a plan, a canal: Panama') == True\nassert is_palindrome('race a car') == False\nassert is_palindrome('') == True"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "he3",
+      "prompt": "Write a Python function `fizzbuzz(n)` that returns a list of strings for 1..n: 'Fizz' if divisible by 3, 'Buzz' if by 5, 'FizzBuzz' if by both, else the number as a string. Return only the function in a code block.",
+      "reference": {
+        "entry_point": "fizzbuzz",
+        "canonical_solution": "def fizzbuzz(n):\n    out = []\n    for i in range(1, n+1):\n        if i % 15 == 0:\n            out.append('FizzBuzz')\n        elif i % 3 == 0:\n            out.append('Fizz')\n        elif i % 5 == 0:\n            out.append('Buzz')\n        else:\n            out.append(str(i))\n    return out",
+        "test": "assert fizzbuzz(5) == ['1','2','Fizz','4','Buzz']\nassert fizzbuzz(15)[-1] == 'FizzBuzz'\nassert fizzbuzz(3) == ['1','2','Fizz']"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "he4",
+      "prompt": "Write a Python function `count_vowels(s)` that returns the number of vowels (a,e,i,o,u, case-insensitive) in the string. Return only the function in a code block.",
+      "reference": {
+        "entry_point": "count_vowels",
+        "canonical_solution": "def count_vowels(s):\n    return sum(1 for c in s.lower() if c in 'aeiou')",
+        "test": "assert count_vowels('Hello World') == 3\nassert count_vowels('xyz') == 0\nassert count_vowels('AEIOU') == 5"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "external_id": "he5",
+      "prompt": "Write a Python function `merge_sorted(a, b)` that merges two already-sorted lists into one sorted list without using sorted(). Return only the function in a code block.",
+      "reference": {
+        "entry_point": "merge_sorted",
+        "canonical_solution": "def merge_sorted(a, b):\n    i = j = 0\n    out = []\n    while i < len(a) and j < len(b):\n        if a[i] <= b[j]:\n            out.append(a[i]); i += 1\n        else:\n            out.append(b[j]); j += 1\n    out.extend(a[i:]); out.extend(b[j:])\n    return out",
+        "test": "assert merge_sorted([1,3,5],[2,4,6]) == [1,2,3,4,5,6]\nassert merge_sorted([],[1,2]) == [1,2]\nassert merge_sorted([1,1],[1]) == [1,1,1]"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "external_id": "he6",
+      "prompt": "Write a Python function `roman_to_int(s)` that converts a Roman numeral string (I,V,X,L,C,D,M) to an integer. Return only the function in a code block.",
+      "reference": {
+        "entry_point": "roman_to_int",
+        "canonical_solution": "def roman_to_int(s):\n    vals = {'I':1,'V':5,'X':10,'L':50,'C':100,'D':500,'M':1000}\n    total = 0\n    prev = 0\n    for c in reversed(s):\n        v = vals[c]\n        if v < prev:\n            total -= v\n        else:\n            total += v\n            prev = v\n    return total",
+        "test": "assert roman_to_int('III') == 3\nassert roman_to_int('IV') == 4\nassert roman_to_int('MCMXCIV') == 1994\nassert roman_to_int('LVIII') == 58"
+      },
+      "difficulty": "medium"
+    }
+  ]
+}

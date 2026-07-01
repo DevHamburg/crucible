@@ -1,0 +1,88 @@
+# Crucible — full stack for self-hosting.
+#   docker compose up --build
+# Brings up: postgres, redis, api (FastAPI), worker (arq), web (Next.js).
+name: crucible
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crucible
+      POSTGRES_PASSWORD: crucible
+      POSTGRES_DB: crucible
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crucible"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: ./apps/api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://crucible:crucible@db:5432/crucible
+      REDIS_URL: redis://redis:6379/0
+      USE_TASK_QUEUE: "true"
+      CRUCIBLE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    command: >
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+
+  worker:
+    build:
+      context: ./apps/api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://crucible:crucible@db:5432/crucible
+      REDIS_URL: redis://redis:6379/0
+      USE_TASK_QUEUE: "true"
+      CRUCIBLE_ENV: production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      arq app.worker.arq_worker.WorkerSettings
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

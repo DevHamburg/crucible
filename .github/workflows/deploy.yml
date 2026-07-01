@@ -4,7 +4,7 @@
 #   1. images   buildx -> push api + web to GHCR (tags :sha and :latest)
 #   2. deploy   ssh to server, rsync compose + deploy script, pull, up, healthcheck
 #
-# The web image bakes NEXT_PUBLIC_API_URL=https://bench.hypexio.com/api at build
+# The web image bakes NEXT_PUBLIC_API_URL=https://crucible.hypexio.com/api at build
 # time (Caddy strips /api and forwards to the FastAPI container).
 #
 # Required GitHub secrets (Settings -> Secrets and variables -> Actions):
@@ -13,7 +13,7 @@
 #   HETZNER_SSH_KEY  full private key (contents of SSH/hypexio_deploy_key)
 #   HETZNER_PORT     optional, default 22
 #   DEPLOY_PATH      /opt/crucible
-#   HEALTH_URL       optional, default https://bench.hypexio.com/health
+#   HEALTH_URL       optional, default https://crucible.hypexio.com/health
 #
 # GITHUB_TOKEN is provided automatically and used to push to GHCR.
 # After the first images run, either make the GHCR packages public OR
@@ -32,7 +32,7 @@ concurrency:
 
 env:
   REGISTRY: ghcr.io
-  PUBLIC_API_URL: https://bench.hypexio.com/api
+  PUBLIC_API_URL: https://crucible.hypexio.com/api
 
 jobs:
   images:
@@ -129,7 +129,7 @@ jobs:
               "cd '$DEPLOY_PATH' && bash ./deploy-recreate.sh '$IMAGE_TAG' '$GHCR_REPO'"
       - name: Healthcheck
         env:
-          HEALTH_URL: ${{ secrets.HEALTH_URL || 'https://bench.hypexio.com/health' }}
+          HEALTH_URL: ${{ secrets.HEALTH_URL || 'https://crucible.hypexio.com/health' }}
         run: |
           for i in $(seq 1 12); do
             code=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo 000)

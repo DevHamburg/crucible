@@ -3,7 +3,7 @@
 # It is a self-contained compose project under /opt/crucible/ with its OWN
 # Postgres + Redis, so it never touches hypexio's data. Its api/web containers
 # additionally join hypexio's Caddy network (EDGE_NETWORK, external) so the
-# single shared Caddy can reverse-proxy bench.hypexio.com to them.
+# single shared Caddy can reverse-proxy crucible.hypexio.com to them.
 #
 # Images: GHCR, pushed by .github/workflows/deploy.yml as
 #   ghcr.io/<owner>/<repo>-api:<sha>  and  -web:<sha>
@@ -17,7 +17,7 @@ x-api-env: &api-env
   SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
   ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
   ALLOW_ANONYMOUS: ${ALLOW_ANONYMOUS:-true}
-  FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-https://bench.hypexio.com}
+  FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-https://crucible.hypexio.com}
   FIRST_ADMIN_EMAIL: ${FIRST_ADMIN_EMAIL:-admin@crucible.local}
   FIRST_ADMIN_PASSWORD: ${FIRST_ADMIN_PASSWORD:-admin}
   GLOBAL_RUN_BUDGET_USD: ${GLOBAL_RUN_BUDGET_USD:-25}
@@ -128,7 +128,7 @@ networks:
   # private: db/redis only reachable from crucible containers
   internal:
     internal: true
-  # shared with hypexio's Caddy so bench.hypexio.com can be reverse-proxied.
+  # shared with hypexio's Caddy so crucible.hypexio.com can be reverse-proxied.
   # Confirm the real name with `docker network ls` (default hypexio_web) and set
   # EDGE_NETWORK in /opt/crucible/.env if it differs.
   edge:

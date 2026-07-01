@@ -51,6 +51,6 @@ jobs:
         run: pnpm exec tsc --noEmit
       - name: Build
         env:
-          NEXT_PUBLIC_API_URL: https://bench.hypexio.com/api
+          NEXT_PUBLIC_API_URL: https://crucible.hypexio.com/api
           NEXT_TELEMETRY_DISABLED: "1"
         run: pnpm build

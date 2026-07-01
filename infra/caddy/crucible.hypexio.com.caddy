@@ -3,14 +3,14 @@
 # redeploys. The single shared Caddy already owns 80/443 on the server.
 #
 # Prereqs:
-#   * DNS: A record  bench.hypexio.com -> 178.104.229.200
+#   * DNS: A record  crucible.hypexio.com -> 178.104.229.200
 #   * Crucible's crucible-api / crucible-web containers join hypexio's Caddy
 #     network (they do, via EDGE_NETWORK=hypexio_web in the Crucible compose).
 #
 # Caddy auto-provisions the TLS cert on first request. The frontend calls the API
 # same-origin under /api/*, which Caddy strips and forwards to the FastAPI app.
 
-bench.hypexio.com {
+crucible.hypexio.com {
 	encode zstd gzip
 
 	header {

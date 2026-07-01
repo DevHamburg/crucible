@@ -2,10 +2,10 @@
 # Crucible deploy-recreate — runs on the server in $DEPLOY_PATH (e.g. /opt/crucible).
 # Usage: bash deploy-recreate.sh <IMAGE_TAG> <GHCR_REPO>
 #   IMAGE_TAG  commit SHA (from CI) or "latest"
-#   GHCR_REPO  e.g. devhamburg/bench   -> pulls ghcr.io/devhamburg/bench-{api,web}
+#   GHCR_REPO  e.g. devhamburg/crucible   -> pulls ghcr.io/devhamburg/crucible-{api,web}
 #
 # The Crucible stack has its own Postgres/Redis and uses create_all-on-startup
-# (no migrate step). It joins hypexio's Caddy network so bench.hypexio.com routes
+# (no migrate step). It joins hypexio's Caddy network so crucible.hypexio.com routes
 # to it — that Caddy block lives in hypexio's repo Caddyfile (added once), so this
 # script never touches hypexio.
 set -euo pipefail

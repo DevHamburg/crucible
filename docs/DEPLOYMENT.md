@@ -1,11 +1,11 @@
-# Crucible — Deployment (bench.hypexio.com, neben hypexio)
+# Crucible — Deployment (crucible.hypexio.com, neben hypexio)
 
 Crucible läuft als eigener Docker-Compose-Stack auf **demselben Hetzner-Server** wie hypexio
 (`178.104.229.200`). Es bringt **eigene Postgres + Redis** mit (rührt hypexios Daten nicht an)
 und hängt sich nur für das Reverse-Proxying an hypexios **geteilten Caddy** (Ports 80/443).
 
 ```
-                bench.hypexio.com (DNS A -> 178.104.229.200)
+                crucible.hypexio.com (DNS A -> 178.104.229.200)
                           │ 443
                           ▼
                   hypexio-caddy  (bereits vorhanden, ein Site-Block je Domain)
@@ -18,9 +18,9 @@ und hängt sich nur für das Reverse-Proxying an hypexios **geteilten Caddy** (P
 ```
 
 - **Bilder:** GHCR, gepusht von `.github/workflows/deploy.yml` als
-  `ghcr.io/devhamburg/bench-api:<sha>` und `-web:<sha>`. Der Worker nutzt das api-Image (arq).
+  `ghcr.io/devhamburg/crucible-api:<sha>` und `-web:<sha>`. Der Worker nutzt das api-Image (arq).
 - **Frontend↔API:** same-origin über `/api/*` (Caddy strippt `/api`) → keine CORS-Probleme.
-  Das web-Image backt `NEXT_PUBLIC_API_URL=https://bench.hypexio.com/api` zur Build-Zeit ein.
+  Das web-Image backt `NEXT_PUBLIC_API_URL=https://crucible.hypexio.com/api` zur Build-Zeit ein.
 - **Migrationen:** keine — die API legt Tabellen bei Start an (`create_all`) und seedet
   Modelle/Benchmarks automatisch beim ersten Start.
 
@@ -34,11 +34,11 @@ und hängt sich nur für das Reverse-Proxying an hypexios **geteilten Caddy** (P
 
 ## Einmaliges Setup
 
-### 1. GitHub-Repo `DevHamburg/bench`
+### 1. GitHub-Repo `DevHamburg/crucible`
 Leeres Repo in GitHub anlegen (privat empfohlen). Dann lokal:
 ```bash
 cd /home/guber/dev/ai-benchmark
-git remote add origin git@github.com:DevHamburg/bench.git
+git remote add origin git@github.com:DevHamburg/crucible.git
 git push -u origin main
 ```
 
@@ -49,12 +49,12 @@ git push -u origin main
 | `HETZNER_USER`    | `deploy`                                                         |
 | `HETZNER_SSH_KEY` | kompletter Inhalt von `hypexio/SSH/hypexio_deploy_key` (PEM)     |
 | `DEPLOY_PATH`     | `/opt/crucible`                                                  |
-| `HEALTH_URL`      | `https://bench.hypexio.com/health` (optional, default ok)        |
+| `HEALTH_URL`      | `https://crucible.hypexio.com/health` (optional, default ok)        |
 
 `GITHUB_TOKEN` ist automatisch da (GHCR-Push).
 
 ### 3. GHCR-Pull-Auth
-Nach dem ersten `images`-Run entweder die Pakete `bench-api` / `bench-web` in GitHub auf
+Nach dem ersten `images`-Run entweder die Pakete `crucible-api` / `crucible-web` in GitHub auf
 **public** stellen, **oder** auf dem Server einmal `docker login ghcr.io` (PAT mit
 `read:packages`).
 
@@ -62,14 +62,14 @@ Nach dem ersten `images`-Run entweder die Pakete `bench-api` / `bench-web` in Gi
 Beim Domain-Provider (Strato) einen Record setzen:
 | Type | Host    | Wert                | TTL  |
 | ---- | ------- | ------------------- | ---- |
-| `A`  | `bench` | `178.104.229.200`   | 3600 |
+| `A`  | `crucible` | `178.104.229.200`   | 3600 |
 
-Prüfen: `dig +short bench.hypexio.com @1.1.1.1` → `178.104.229.200`.
+Prüfen: `dig +short crucible.hypexio.com @1.1.1.1` → `178.104.229.200`.
 
 ### 5. Caddy-Block in **hypexios** Repo ergänzen (dauerhaft)
-Den Inhalt von `infra/caddy/bench.hypexio.com.caddy` **an hypexios**
+Den Inhalt von `infra/caddy/crucible.hypexio.com.caddy` **an hypexios**
 `infra/caddy/Caddyfile` anhängen, committen, pushen — hypexios Deploy rollt den geänderten
-Caddyfile aus und Caddy holt automatisch das TLS-Zert für `bench.hypexio.com`.
+Caddyfile aus und Caddy holt automatisch das TLS-Zert für `crucible.hypexio.com`.
 
 > Warum in hypexios Repo? Weil hypexios Deploy den Caddyfile per rsync überschreibt — ein nur
 > auf dem Server angehängter Block würde beim nächsten hypexio-Deploy verschwinden. Der Block
@@ -97,14 +97,14 @@ docker inspect hypexio-caddy -f '{{range $k,$v := .NetworkSettings.Networks}}{{$
 ### 7. Erster Deploy
 `git push origin main` → Workflow baut Images, pusht zu GHCR, deployt. Danach:
 ```bash
-curl -fsSL https://bench.hypexio.com/health   # {"status":"ok"}
+curl -fsSL https://crucible.hypexio.com/health   # {"status":"ok"}
 ```
 (TLS-Erstausstellung kann 30–60 s dauern.)
 
 ## Umami-Analytics (geteilte Instanz stats.hypexio.com)
-Dein bestehendes Umami trackt auch bench.hypexio.com:
+Dein bestehendes Umami trackt auch crucible.hypexio.com:
 1. In der Umami-UI (`https://stats.hypexio.com`) **Settings → Websites → Add**: Name `Crucible`,
-   Domain `bench.hypexio.com` → generierte **Website-UUID** kopieren.
+   Domain `crucible.hypexio.com` → generierte **Website-UUID** kopieren.
 2. In GitHub die **Repository-Variable** (nicht Secret) setzen: Settings → Secrets and variables →
    Actions → **Variables** → `UMAMI_WEBSITE_ID` = die UUID. (Optional `UMAMI_SRC`, default
    `https://stats.hypexio.com/script.js`.)

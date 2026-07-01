@@ -65,7 +65,7 @@ docker compose up --build
 ```
 
 **Hosted deploy** (GitHub Actions → GHCR → Hetzner, behind a shared Caddy at
-`bench.hypexio.com`): CI in `.github/workflows/ci.yml`, deploy in `deploy.yml`,
+`crucible.hypexio.com`): CI in `.github/workflows/ci.yml`, deploy in `deploy.yml`,
 full runbook in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## 🔑 Using real models

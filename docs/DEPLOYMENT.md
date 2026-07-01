@@ -101,6 +101,16 @@ curl -fsSL https://bench.hypexio.com/health   # {"status":"ok"}
 ```
 (TLS-Erstausstellung kann 30–60 s dauern.)
 
+## Umami-Analytics (geteilte Instanz stats.hypexio.com)
+Dein bestehendes Umami trackt auch bench.hypexio.com:
+1. In der Umami-UI (`https://stats.hypexio.com`) **Settings → Websites → Add**: Name `Crucible`,
+   Domain `bench.hypexio.com` → generierte **Website-UUID** kopieren.
+2. In GitHub die **Repository-Variable** (nicht Secret) setzen: Settings → Secrets and variables →
+   Actions → **Variables** → `UMAMI_WEBSITE_ID` = die UUID. (Optional `UMAMI_SRC`, default
+   `https://stats.hypexio.com/script.js`.)
+3. Nächster Deploy backt die ID ins web-Image → das Umami-Script lädt automatisch. Pageviews
+   erscheinen in Umami → Realtime. Ohne gesetzte ID wird kein Tracking-Script ausgeliefert.
+
 ## Rollback
 ```bash
 ssh deploy@178.104.229.200 && cd /opt/crucible

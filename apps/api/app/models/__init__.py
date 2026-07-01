@@ -55,6 +55,9 @@ class User(Base, TimestampMixin):
     display_name: Mapped[str] = mapped_column(String(120), default="")
     is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Anonymous visitors get a real (flagged) row so keys/runs attach uniformly.
+    # Registering upgrades the same row in place (is_anonymous -> False), keeping history.
+    is_anonymous: Mapped[bool] = mapped_column(Boolean, default=False)
 
     api_keys: Mapped[list[ApiKey]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
@@ -254,6 +257,7 @@ class ArenaMatch(Base, TimestampMixin):
         ForeignKey("tournaments.id", ondelete="CASCADE"), nullable=True, index=True
     )
     round_no: Mapped[int] = mapped_column(Integer, default=0)
+    user_id: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)  # creator (for own/global scoping)
     domain: Mapped[str] = mapped_column(String(60), default="mixed")
     topic: Mapped[str] = mapped_column(Text, default="")
     prompt: Mapped[str] = mapped_column(Text, default="")

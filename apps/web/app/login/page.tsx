@@ -42,7 +42,8 @@ export default function LoginPage() {
           </div>
           <h1 className="text-2xl font-semibold">{mode === "login" ? "Sign in" : "Create account"}</h1>
           <p className="mt-1 text-sm text-zinc-400">
-            Store encrypted API keys and share results on the leaderboard.
+            Unlock the <span className="gradient-text">global community leaderboards</span> — Elo
+            arena, capability & safety rankings across every model. Your guest runs & keys carry over.
           </p>
         </div>
         <Card>
@@ -83,7 +84,8 @@ export default function LoginPage() {
           {mode === "login" ? "No account? Register" : "Have an account? Sign in"}
         </button>
         <p className="mt-6 text-center text-xs text-zinc-600">
-          You can also explore anonymously — the simulated model fleet needs no login.
+          No login needed to run benchmarks — you're already a guest. Signing in just adds the
+          global board and keeps your history safe.
         </p>
       </motion.div>
     </div>

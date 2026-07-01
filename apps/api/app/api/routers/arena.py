@@ -88,6 +88,7 @@ async def create_match(
         kind="elo", domain=body.domain, prompt=prompt, model_a=body.model_a, model_b=body.model_b,
         response_a=res.response_a[:6000], response_b=res.response_b[:6000], winner=res.winner,
         judge_model=judge, rationale=res.rationale[:1500], scores=res.scores, cost=res.cost,
+        user_id=user.id if user else None,
     )
     session.add(m)
     await session.commit()
@@ -111,7 +112,7 @@ async def create_debate(
     m = ArenaMatch(
         kind="debate", domain=body.domain, topic=topic, model_a=body.model_a, model_b=body.model_b,
         winner=res.winner, judge_model=judge, rationale=res.rationale[:1500], rounds=res.rounds,
-        cost=res.cost,
+        cost=res.cost, user_id=user.id if user else None,
     )
     session.add(m)
     await session.commit()
@@ -120,11 +121,18 @@ async def create_debate(
 
 @router.get("/matches")
 async def list_matches(
-    kind: str | None = None, limit: int = 50, session: AsyncSession = Depends(get_session)
+    kind: str | None = None,
+    limit: int = 50,
+    user: User | None = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
 ) -> list[dict]:
+    from app.api.deps import is_registered
+
     stmt = select(ArenaMatch).where(ArenaMatch.tournament_id.is_(None)).order_by(ArenaMatch.created_at.desc()).limit(limit)
     if kind:
         stmt = stmt.where(ArenaMatch.kind == kind)
+    if not is_registered(user):  # guests only see their own battles
+        stmt = stmt.where(ArenaMatch.user_id == (user.id if user else None))
     rows = (await session.scalars(stmt)).all()
     return [_match_out(m) for m in rows]
 
@@ -179,8 +187,17 @@ async def create_tournament(
 
 
 @router.get("/tournaments")
-async def list_tournaments(limit: int = 30, session: AsyncSession = Depends(get_session)) -> list[dict]:
+async def list_tournaments(
+    limit: int = 30,
+    user: User | None = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> list[dict]:
+    from app.api.deps import is_registered
+
     rows = (await session.scalars(select(Tournament).order_by(Tournament.created_at.desc()).limit(limit))).all()
+    if not is_registered(user):  # guests only see their own tournaments
+        uid = user.id if user else None
+        rows = [t for t in rows if (t.config or {}).get("user_id") == uid]
     return [_tournament_out(t) for t in rows]
 
 

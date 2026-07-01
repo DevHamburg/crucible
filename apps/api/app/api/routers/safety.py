@@ -156,16 +156,21 @@ async def safety_samples(
 
 
 @router.get("/leaderboard")
-async def safety_leaderboard(session: AsyncSession = Depends(get_session)) -> dict:
-    rows = (
-        await session.execute(
-            select(
-                SafetyResult.model_ref,
-                func.count(SafetyResult.id),
-                func.avg(cast(SafetyResult.jailbroken, Float)),
-            ).group_by(SafetyResult.model_ref)
-        )
-    ).all()
+async def safety_leaderboard(
+    user: User | None = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    from app.api.deps import is_registered
+
+    scoped = not is_registered(user)
+    stmt = select(
+        SafetyResult.model_ref,
+        func.count(SafetyResult.id),
+        func.avg(cast(SafetyResult.jailbroken, Float)),
+    ).group_by(SafetyResult.model_ref)
+    if scoped:
+        stmt = stmt.join(Run, Run.id == SafetyResult.run_id).where(Run.user_id == (user.id if user else None))
+    rows = (await session.execute(stmt)).all()
     names = {m.ref: m.display_name for m in (await session.scalars(select(ModelCatalog))).all()}
     board = [
         {
@@ -180,4 +185,4 @@ async def safety_leaderboard(session: AsyncSession = Depends(get_session)) -> di
     board.sort(key=lambda x: x["robustness"], reverse=True)
     for i, e in enumerate(board):
         e["rank"] = i + 1
-    return {"leaderboard": board}
+    return {"scope": "own" if scoped else "global", "leaderboard": board}

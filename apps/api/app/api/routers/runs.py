@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import Float, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, is_registered
 from app.api.serialize import run_out
 from app.api.sse import event_stream
 from app.core.config import settings
@@ -67,21 +67,39 @@ async def create_run(
 async def list_runs(
     kind: str | None = None,
     limit: int = 50,
+    scope: str = "own",
     user: User | None = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> list[dict]:
     stmt = select(Run).order_by(Run.created_at.desc()).limit(limit)
     if kind:
         stmt = stmt.where(Run.kind == kind)
+    # Everyone sees their own runs; registered users can request the community feed.
+    if scope == "community" and is_registered(user):
+        pass
+    else:
+        stmt = stmt.where(Run.user_id == (user.id if user else None))
     rows = (await session.scalars(stmt)).all()
     return [run_out(r) for r in rows]
 
 
+def _can_view(run: Run, user: User | None) -> bool:
+    if user and run.user_id == user.id:
+        return True
+    return is_registered(user)  # registered accounts can view any run
+
+
 @router.get("/{run_id}")
-async def get_run(run_id: str, session: AsyncSession = Depends(get_session)) -> dict:
+async def get_run(
+    run_id: str,
+    user: User | None = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
     run = await session.get(Run, run_id)
     if not run:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Run not found")
+    if not _can_view(run, user):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "This run is private — sign in to view community runs")
     return run_out(run)
 
 
@@ -89,11 +107,14 @@ async def get_run(run_id: str, session: AsyncSession = Depends(get_session)) -> 
 async def run_results(
     run_id: str,
     items: bool = Query(default=False),
+    user: User | None = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
     run = await session.get(Run, run_id)
     if not run:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Run not found")
+    if not _can_view(run, user):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "This run is private — sign in to view community runs")
 
     # per model x benchmark aggregate
     rows = (

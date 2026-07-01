@@ -5,24 +5,46 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import Float, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import get_current_user, is_registered
 from app.core.db import get_session
-from app.models import Generation, ModelCatalog, Result, Run
+from app.models import Generation, ModelCatalog, Result, Run, User
 
 router = APIRouter(prefix="/observability", tags=["observability"])
 
 
 @router.get("/overview")
-async def overview(session: AsyncSession = Depends(get_session)) -> dict:
-    n_runs = await session.scalar(select(func.count(Run.id))) or 0
-    n_gens = await session.scalar(select(func.count(Generation.id))) or 0
-    total_cost = await session.scalar(select(func.sum(Generation.cost))) or 0.0
-    prompt_tokens = await session.scalar(select(func.sum(Generation.prompt_tokens))) or 0
-    completion_tokens = await session.scalar(select(func.sum(Generation.completion_tokens))) or 0
-    avg_latency = await session.scalar(select(func.avg(Generation.latency_ms))) or 0.0
-    errors = await session.scalar(select(func.count(Generation.id)).where(Generation.status == "error")) or 0
-    active_runs = await session.scalar(select(func.count(Run.id)).where(Run.status == "running")) or 0
-    n_results = await session.scalar(select(func.count(Result.id))) or 0
+async def overview(
+    user: User | None = Depends(get_current_user), session: AsyncSession = Depends(get_session)
+) -> dict:
+    scoped = not is_registered(user)
+    uid = user.id if user else None
+
+    def gen_q(agg):
+        q = select(agg)
+        if scoped:
+            q = q.join(Run, Run.id == Generation.run_id).where(Run.user_id == uid)
+        return q
+
+    def run_q(agg, *where):
+        q = select(agg).where(*where)
+        if scoped:
+            q = q.where(Run.user_id == uid)
+        return q
+
+    n_runs = await session.scalar(run_q(func.count(Run.id))) or 0
+    n_gens = await session.scalar(gen_q(func.count(Generation.id))) or 0
+    total_cost = await session.scalar(gen_q(func.sum(Generation.cost))) or 0.0
+    prompt_tokens = await session.scalar(gen_q(func.sum(Generation.prompt_tokens))) or 0
+    completion_tokens = await session.scalar(gen_q(func.sum(Generation.completion_tokens))) or 0
+    avg_latency = await session.scalar(gen_q(func.avg(Generation.latency_ms))) or 0.0
+    errors = await session.scalar(gen_q(func.count(Generation.id)).where(Generation.status == "error")) or 0
+    active_runs = await session.scalar(run_q(func.count(Run.id), Run.status == "running")) or 0
+    n_results = await session.scalar(
+        (select(func.count(Result.id)).join(Run, Run.id == Result.run_id).where(Run.user_id == uid))
+        if scoped else select(func.count(Result.id))
+    ) or 0
     return {
+        "scope": "own" if scoped else "global",
         "runs": int(n_runs),
         "active_runs": int(active_runs),
         "generations": int(n_gens),
@@ -37,20 +59,22 @@ async def overview(session: AsyncSession = Depends(get_session)) -> dict:
 
 
 @router.get("/costs")
-async def costs(session: AsyncSession = Depends(get_session)) -> list[dict]:
-    rows = (
-        await session.execute(
-            select(
-                Generation.model_ref,
-                func.count(Generation.id),
-                func.sum(Generation.prompt_tokens),
-                func.sum(Generation.completion_tokens),
-                func.sum(Generation.cost),
-                func.avg(Generation.latency_ms),
-                func.avg(cast(Generation.status == "error", Float)),
-            ).group_by(Generation.model_ref)
-        )
-    ).all()
+async def costs(
+    user: User | None = Depends(get_current_user), session: AsyncSession = Depends(get_session)
+) -> list[dict]:
+    scoped = not is_registered(user)
+    stmt = select(
+        Generation.model_ref,
+        func.count(Generation.id),
+        func.sum(Generation.prompt_tokens),
+        func.sum(Generation.completion_tokens),
+        func.sum(Generation.cost),
+        func.avg(Generation.latency_ms),
+        func.avg(cast(Generation.status == "error", Float)),
+    ).group_by(Generation.model_ref)
+    if scoped:
+        stmt = stmt.join(Run, Run.id == Generation.run_id).where(Run.user_id == (user.id if user else None))
+    rows = (await session.execute(stmt)).all()
     names = {m.ref: m.display_name for m in (await session.scalars(select(ModelCatalog))).all()}
     out = []
     for ref, calls, pt, ct, cost, lat, err in rows:

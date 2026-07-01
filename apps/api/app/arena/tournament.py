@@ -29,7 +29,8 @@ async def execute_tournament(tournament_id: str) -> None:
         domain = t.domain or "mixed"
         best_of = int((t.config or {}).get("best_of", 3))
         judge_model = (t.config or {}).get("judge_model") or settings.judge_model
-        user_keys = await _load_user_keys(s, (t.config or {}).get("user_id"))
+        owner_id = (t.config or {}).get("user_id")
+        user_keys = await _load_user_keys(s, owner_id)
         meta = await load_meta(s, models)
         t.status = "running"
         await s.commit()
@@ -76,7 +77,7 @@ async def execute_tournament(tournament_id: str) -> None:
                         domain=domain, prompt=prompt, model_a=a, model_b=b,
                         response_a=res.response_a[:4000], response_b=res.response_b[:4000],
                         winner=res.winner, judge_model=judge_model, rationale=res.rationale[:1000],
-                        cost=res.cost,
+                        cost=res.cost, user_id=owner_id,
                     ))
                     await s.commit()
                 await bus.publish(channel, {

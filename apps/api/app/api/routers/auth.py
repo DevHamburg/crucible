@@ -27,22 +27,62 @@ class LoginIn(BaseModel):
 
 
 def _user_out(u: User) -> dict:
-    return {"id": u.id, "email": u.email, "display_name": u.display_name, "is_admin": u.is_admin}
+    return {
+        "id": u.id,
+        "email": None if u.is_anonymous else u.email,
+        "display_name": u.display_name,
+        "is_admin": u.is_admin,
+        "is_anonymous": u.is_anonymous,
+    }
 
 
 def _token(u: User) -> dict:
     return {
-        "access_token": create_access_token(u.id, {"email": u.email, "admin": u.is_admin}),
+        "access_token": create_access_token(
+            u.id, {"email": u.email, "admin": u.is_admin, "anon": u.is_anonymous}
+        ),
         "token_type": "bearer",
         "user": _user_out(u),
     }
 
 
+@router.post("/anon")
+async def anon_session(session: AsyncSession = Depends(get_session)) -> dict:
+    """Provision a throwaway anonymous account so any visitor can run benchmarks and
+    store keys immediately. Registering later upgrades this same row (history kept)."""
+    from app.models import new_id
+
+    uid = new_id()
+    user = User(
+        email=f"anon+{uid}@crucible.local",
+        hashed_password="!",  # unusable — anon rows can't log in with a password
+        display_name="Guest",
+        is_anonymous=True,
+    )
+    session.add(user)
+    await session.commit()
+    return _token(user)
+
+
 @router.post("/register")
-async def register(body: RegisterIn, session: AsyncSession = Depends(get_session)) -> dict:
+async def register(
+    body: RegisterIn,
+    current: User | None = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
     exists = await session.scalar(select(User).where(User.email == body.email))
-    if exists:
+    if exists and not (current and exists.id == current.id):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
+
+    if current and current.is_anonymous:
+        # Upgrade the anonymous account in place -> keeps all runs, keys and results.
+        current.email = body.email
+        current.hashed_password = hash_password(body.password)
+        current.display_name = body.display_name or body.email.split("@")[0]
+        current.is_anonymous = False
+        await session.commit()
+        return _token(current)
+
     user = User(
         email=body.email,
         hashed_password=hash_password(body.password),

@@ -4,9 +4,10 @@ import { setToken } from "./api";
 
 interface AuthUser {
   id: string;
-  email: string;
+  email: string | null;
   display_name: string;
   is_admin: boolean;
+  is_anonymous: boolean;
 }
 
 interface AppState {

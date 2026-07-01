@@ -40,4 +40,9 @@ async def require_admin(user: User = Depends(require_user)) -> User:
     return user
 
 
+def is_registered(user: User | None) -> bool:
+    """A signed-in, non-anonymous account (unlocks global community views)."""
+    return bool(user and not user.is_anonymous)
+
+
 DBSession = Depends(get_session)

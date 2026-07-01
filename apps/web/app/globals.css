@@ -97,6 +97,42 @@ body::after {
   background: transparent;
 }
 
+/* ------------------------------------------------------------------ */
+/* Form controls — guarantee visibility on the dark theme. The inline    */
+/* utility classes (bg-white/[0.03], border-line) are too faint on their  */
+/* own, so enforce a clearly visible baseline for every input/select.     */
+/* ------------------------------------------------------------------ */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="submit"]):not([type="button"]),
+select,
+textarea {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #f4f4f5 !important;
+  color-scheme: dark;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #8a8a94 !important;
+  opacity: 1;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(139, 92, 246, 0.75) !important;
+  outline: none;
+}
+/* native select dropdown list */
+select option {
+  background: #14141f;
+  color: #f4f4f5;
+}
+/* range sliders (limit / temperature / rounds …) */
+input[type="range"] {
+  color-scheme: dark;
+  accent-color: #8b5cf6;
+}
+/* keep pill/segmented buttons that happen to be <button> unaffected */
+
 /* skeleton shimmer */
 .skeleton {
   position: relative;

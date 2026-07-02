@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
-from sqlalchemy import Float, cast, func, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, is_registered
@@ -11,7 +11,7 @@ from app.api.serialize import run_out
 from app.api.sqlutil import bool_num
 from app.api.sse import event_stream
 from app.core.config import settings
-from app.core.db import get_session
+from app.core.db import SessionLocal, get_session
 from app.engine.dispatch import cancel as cancel_task
 from app.engine.dispatch import start_run
 from app.models import Result, Run, User
@@ -21,14 +21,14 @@ router = APIRouter(prefix="/runs", tags=["runs"])
 
 class RunIn(BaseModel):
     name: str = ""
-    models: list[str] = Field(default_factory=list)
-    benchmarks: list[str] = Field(default_factory=list)
-    limit: int = 10
-    temperature: float = 0.2
-    max_tokens: int = 1024
+    models: list[str] = Field(default_factory=list, max_length=50)
+    benchmarks: list[str] = Field(default_factory=list, max_length=50)
+    limit: int = Field(default=10, ge=1, le=200)
+    temperature: float = Field(default=0.2, ge=0.0, le=2.0)
+    max_tokens: int = Field(default=1024, ge=1, le=32768)
     judge_model: str | None = None
-    concurrency: int | None = None
-    budget: float | None = None
+    concurrency: int | None = Field(default=None, ge=1, le=64)
+    budget: float | None = Field(default=None, ge=0.0)
 
 
 @router.post("")
@@ -49,7 +49,7 @@ async def create_run(
         "max_tokens": body.max_tokens,
         "judge_model": body.judge_model or settings.judge_model,
         "concurrency": body.concurrency or settings.max_concurrency,
-        "budget": body.budget or settings.global_run_budget_usd,
+        "budget": body.budget if body.budget is not None else settings.global_run_budget_usd,
     }
     run = Run(
         name=body.name or f"Run · {', '.join(body.benchmarks[:2])}",
@@ -67,7 +67,7 @@ async def create_run(
 @router.get("")
 async def list_runs(
     kind: str | None = None,
-    limit: int = 50,
+    limit: int = Query(default=50, ge=1, le=200),
     scope: str = "own",
     user: User | None = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
@@ -108,6 +108,7 @@ async def get_run(
 async def run_results(
     run_id: str,
     items: bool = Query(default=False),
+    item_limit: int = Query(default=100, ge=1, le=200),
     user: User | None = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
@@ -174,7 +175,7 @@ async def run_results(
     if items:
         rows2 = (
             await session.scalars(
-                select(Result).where(Result.run_id == run_id).order_by(Result.created_at.desc()).limit(200)
+                select(Result).where(Result.run_id == run_id).order_by(Result.created_at.desc()).limit(item_limit)
             )
         ).all()
         out["items"] = [
@@ -196,14 +197,16 @@ async def run_results(
 
 
 @router.get("/{run_id}/stream")
-async def stream_run(run_id: str, session: AsyncSession = Depends(get_session)):
-    run = await session.get(Run, run_id)
-    if not run:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Run not found")
+async def stream_run(run_id: str):
+    # No request-scoped session: an SSE stream holds its dependencies open for its whole
+    # lifetime, which would pin a pooled DB connection until the client disconnects.
+    async with SessionLocal() as s:
+        run = await s.get(Run, run_id)
+        if not run:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Run not found")
+        initial = run_out(run)
 
     async def poll():
-        from app.core.db import SessionLocal
-
         async with SessionLocal() as s:
             r = await s.get(Run, run_id)
             if not r:
@@ -211,7 +214,7 @@ async def stream_run(run_id: str, session: AsyncSession = Depends(get_session)):
             return {"status": r.status, "progress": r.progress, "done": r.done_items,
                     "total": r.total_items, "cost": r.total_cost}
 
-    return await event_stream(run_id, initial=run_out(run), poll=poll)
+    return await event_stream(run_id, initial=initial, poll=poll)
 
 
 @router.post("/{run_id}/cancel")

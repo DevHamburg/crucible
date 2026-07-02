@@ -3,9 +3,7 @@ escalation) across the selected models and records SafetyResult rows + live even
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime, timezone
-
-from sqlalchemy import select
+from datetime import UTC, datetime
 
 from app.core.config import settings
 from app.core.db import SessionLocal
@@ -21,7 +19,7 @@ from app.safety.refusal import harm_score, is_jailbroken, is_refusal
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def select_probes(config: dict) -> list[Probe]:
@@ -56,11 +54,15 @@ async def _single_probe(model_ref: str, probe: Probe, user_keys: dict, meta: dic
     inp, out, _ = price_for(model_ref)
     cost = compute_cost(comp.prompt_tokens, comp.completion_tokens, inp, out)
     broke = is_jailbroken(comp.text, probe.canary, probe.expect)
+    errored = not comp.ok
     return {
         "response": comp.text,
-        "refused": is_refusal(comp.text) and not broke,
+        # A provider/transport error is neither a refusal nor a jailbreak — counting it as
+        # "refused" would make an unreachable model look perfectly robust.
+        "refused": (is_refusal(comp.text) and not broke) if not errored else False,
         "jailbroken": broke,
         "harm": harm_score(broke, comp.text),
+        "errored": errored,
         "cost": cost,
     }
 
@@ -77,7 +79,7 @@ async def execute_safety_run(run_id: str) -> None:
         probes = select_probes(config)
         adaptive = bool(config.get("adaptive", False))
         attacker = config.get("attacker_model") or settings.redteam_attacker_model
-        max_rounds = int(config.get("max_rounds", 4))
+        max_rounds = max(1, int(config.get("max_rounds", 4)))  # clamp: 0 -> empty attack loop -> IndexError
 
         worklist = [(m, p) for m in models for p in probes]
         run.status = "running"
@@ -86,6 +88,7 @@ async def execute_safety_run(run_id: str) -> None:
         run.done_items = 0
         await session.commit()
 
+    budget = float(config.get("budget") or settings.global_run_budget_usd)
     await bus.publish(run_id, {"type": "run_started", "run_id": run_id, "total": len(worklist)})
     sem = asyncio.Semaphore(int(config.get("concurrency") or settings.max_concurrency))
 
@@ -113,58 +116,96 @@ async def execute_safety_run(run_id: str) -> None:
     tasks = [asyncio.create_task(bounded(m, p)) for m, p in worklist]
     done = 0
     total_cost = 0.0
-    for fut in asyncio.as_completed(tasks):
-        model_ref, probe, res, turns, transcript = await fut
-        done += 1
-        total_cost += res["cost"]
-        async with SessionLocal() as s:
-            s.add(
-                SafetyResult(
-                    run_id=run_id,
-                    model_ref=model_ref,
-                    category=probe.category,
-                    technique=probe.technique,
-                    goal=probe.description,
-                    attack_prompt=probe.attack_prompt[:2000],
-                    response=res["response"][:4000],
-                    refused=res["refused"],
-                    jailbroken=res["jailbroken"],
-                    harm_score=res["harm"],
-                    turns=turns,
-                    rationale=f"expect={probe.expect} canary={probe.canary!r}",
-                    transcript=transcript,
+    stopped = False
+    cancelled = False
+    error_msg = ""
+    try:
+        for fut in asyncio.as_completed(tasks):
+            model_ref, probe, res, turns, transcript = await fut
+            done += 1
+            total_cost += res["cost"]
+            async with SessionLocal() as s:
+                s.add(
+                    SafetyResult(
+                        run_id=run_id,
+                        model_ref=model_ref,
+                        category=probe.category,
+                        technique=probe.technique,
+                        goal=probe.description,
+                        attack_prompt=probe.attack_prompt[:2000],
+                        response=res["response"][:4000],
+                        refused=res["refused"],
+                        jailbroken=res["jailbroken"],
+                        harm_score=res["harm"],
+                        turns=turns,
+                        rationale=f"expect={probe.expect} canary={probe.canary!r}",
+                        transcript=transcript,
+                    )
                 )
+                run = await s.get(Run, run_id)
+                run.done_items = done
+                run.total_cost = round(total_cost, 6)
+                run.progress = round(done / max(len(worklist), 1), 4)
+                if run.status == "cancelled":
+                    cancelled = True
+                await s.commit()
+
+            if cancelled:
+                break
+
+            await bus.publish(
+                run_id,
+                {
+                    "type": "item_done",
+                    "run_id": run_id,
+                    "done": done,
+                    "total": len(worklist),
+                    "progress": round(done / max(len(worklist), 1), 4),
+                    "model_ref": model_ref,
+                    "category": probe.category,
+                    "jailbroken": res["jailbroken"],
+                    "turns": turns,
+                    "cost": round(total_cost, 4),
+                },
             )
-            run = await s.get(Run, run_id)
-            run.done_items = done
-            run.total_cost = round(total_cost, 6)
-            run.progress = round(done / max(len(worklist), 1), 4)
-            await s.commit()
-        await bus.publish(
-            run_id,
-            {
-                "type": "item_done",
-                "run_id": run_id,
-                "done": done,
-                "total": len(worklist),
-                "progress": round(done / max(len(worklist), 1), 4),
-                "model_ref": model_ref,
-                "category": probe.category,
-                "jailbroken": res["jailbroken"],
-                "turns": turns,
-                "cost": round(total_cost, 4),
-            },
-        )
+
+            if total_cost > budget and not stopped:
+                stopped = True
+                break
+    except asyncio.CancelledError:
+        cancelled = True
+    except Exception as exc:  # noqa: BLE001 — a probe/DB failure must not hang the run forever
+        error_msg = str(exc) or exc.__class__.__name__
+    finally:
+        for t in tasks:
+            t.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
     async with SessionLocal() as s:
         run = await s.get(Run, run_id)
-        run.status = "completed"
-        run.finished_at = utcnow()
-        await s.commit()
+        if run is not None:
+            if cancelled or run.status == "cancelled":
+                run.status = "cancelled"
+            elif error_msg:
+                run.status = "error"
+                run.error = error_msg[:2000]
+            else:
+                run.status = "completed"
+                if stopped:
+                    run.error = f"stopped: budget ${budget} exceeded (${total_cost:.4f})"
+            run.finished_at = utcnow()
+            run.progress = round(done / max(len(worklist), 1), 4)
+            run.total_cost = round(total_cost, 6)
+            await s.commit()
+            final_status = run.status
+        else:
+            final_status = "completed"
+
     await bus.publish(
         run_id,
-        {"type": "run_completed", "run_id": run_id, "done": done, "total": len(worklist),
-         "total_cost": round(total_cost, 4)},
+        {"type": "run_error" if final_status == "error" else "run_completed",
+         "run_id": run_id, "status": final_status, "done": done, "total": len(worklist),
+         "total_cost": round(total_cost, 4), "error": error_msg},
     )
 
 

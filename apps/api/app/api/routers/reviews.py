@@ -1,7 +1,7 @@
 """Human-in-the-loop review of scored results."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -21,7 +21,9 @@ class ReviewIn(BaseModel):
 
 
 @router.get("/queue")
-async def review_queue(limit: int = 50, session: AsyncSession = Depends(get_session)) -> list[dict]:
+async def review_queue(
+    limit: int = Query(default=50, ge=1, le=200), session: AsyncSession = Depends(get_session)
+) -> list[dict]:
     rows = (
         await session.scalars(
             select(Result).where(Result.needs_review.is_(True)).order_by(Result.created_at.desc()).limit(limit)

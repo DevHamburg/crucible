@@ -5,6 +5,7 @@ import { Globe, Lock, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useApp } from "@/lib/store";
+import { useHydrated } from "@/lib/useHydrated";
 
 // Pages whose data becomes GLOBAL/community once you sign in.
 const GATED = ["/leaderboard", "/arena", "/safety", "/observability"];
@@ -16,8 +17,9 @@ const GATED = ["/leaderboard", "/arena", "/safety", "/observability"];
 export function CommunityGate() {
   const path = usePathname();
   const user = useApp((s) => s.user);
+  const hydrated = useHydrated();
   const isGuest = !user || user.is_anonymous;
-  const show = isGuest && GATED.some((p) => path.startsWith(p));
+  const show = hydrated && isGuest && GATED.some((p) => path.startsWith(p));
 
   return (
     <AnimatePresence>

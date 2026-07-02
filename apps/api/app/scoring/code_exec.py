@@ -53,7 +53,7 @@ async def run_program(source: str, timeout: float = _HARNESS_TIMEOUT) -> tuple[b
             return False, f"spawn error: {exc}"
         try:
             _out, err = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             try:
                 proc.kill()
             except ProcessLookupError:

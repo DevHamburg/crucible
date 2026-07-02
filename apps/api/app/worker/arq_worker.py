@@ -24,3 +24,6 @@ class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(settings.redis_url or "redis://localhost:6379/0")
     max_jobs = 10
     job_timeout = 3600
+    # Write a health record every 30s so `arq --check` (the container healthcheck) can tell
+    # a hung/dead worker from a live one instead of leaving jobs silently stuck.
+    health_check_interval = 30

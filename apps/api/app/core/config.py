@@ -31,6 +31,8 @@ class Settings(BaseSettings):
 
     # ---- database ----
     database_url: str = ""  # empty -> local sqlite file
+    db_pool_size: int = 10          # (postgres only) base pooled connections
+    db_max_overflow: int = 20       # (postgres only) burst headroom for concurrent SSE streams
 
     # ---- queue / cache ----
     redis_url: str = ""
@@ -95,8 +97,19 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     s = Settings()
-    # Auto-provision an encryption key for zero-config dev (persisted to var/).
+    prod = s.crucible_env.lower() == "production"
     if not s.encryption_key:
+        if prod:
+            # A per-process auto-generated key is disastrous with separate api/worker
+            # containers (or --workers >1): each gets a different Fernet key, so stored
+            # provider keys become undecryptable. Refuse to start instead of silently
+            # corrupting them.
+            raise RuntimeError(
+                "ENCRYPTION_KEY must be set in production. Generate one with: "
+                'python -c "from cryptography.fernet import Fernet; '
+                'print(Fernet.generate_key().decode())"'
+            )
+        # Auto-provision a persistent key for zero-config dev (persisted to var/).
         key_file = DATA_DIR / ".fernet_key"
         if key_file.exists():
             s.encryption_key = key_file.read_text().strip()
@@ -106,6 +119,8 @@ def get_settings() -> Settings:
             s.encryption_key = Fernet.generate_key().decode()
             key_file.write_text(s.encryption_key)
             os.chmod(key_file, 0o600)
+    if prod and s.secret_key == "dev-insecure-secret-change-me-please-32b+":
+        raise RuntimeError("SECRET_KEY must be set to a strong secret in production.")
     return s
 
 

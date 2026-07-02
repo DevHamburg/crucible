@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    name: Backend — tests
+    name: Backend — lint & tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -23,14 +23,72 @@ jobs:
         run: pip install -e ".[dev]"
       - name: Ruff (lint)
         run: ruff check .
-        continue-on-error: true
       - name: Pytest
         run: pytest -q
       - name: Seed smoke (SQLite, no keys)
         run: python -m app.seeds.seed
 
+  backend-postgres:
+    name: Backend — PostgreSQL parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: crucible
+          POSTGRES_PASSWORD: crucible
+          POSTGRES_DB: crucible
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crucible"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      # Exercises the real prod DB engine — catches SQLite-only SQL that Postgres rejects
+      # (the boolean-aggregate class that previously only broke in production).
+      DATABASE_URL: postgresql+asyncpg://crucible:crucible@localhost:5432/crucible
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Seed + demo data (populates runs/results/arena/safety)
+        run: |
+          python -m app.seeds.seed
+          python -m app.seeds.demo
+      - name: Start API
+        run: |
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          echo $! > /tmp/api.pid
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8000/health/ready && break
+            sleep 1
+          done
+      - name: Hit aggregation endpoints (must all be 2xx on Postgres)
+        run: |
+          set -e
+          base=http://127.0.0.1:8000
+          for path in \
+            /health/ready \
+            /leaderboard /leaderboard/elo \
+            /observability/overview /observability/costs "/observability/generations?limit=5" \
+            /runs /arena/matches /arena/tournaments \
+            /safety/leaderboard /reviews/queue; do
+            echo "GET $path"
+            curl -sf "$base$path" > /dev/null
+          done
+      - name: Stop API
+        if: always()
+        run: kill "$(cat /tmp/api.pid)" 2>/dev/null || true
+
   frontend:
-    name: Frontend — typecheck & build
+    name: Frontend — lint, typecheck & build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -47,6 +105,8 @@ jobs:
           cache: pnpm
           cache-dependency-path: apps/web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm lint
       - name: Typecheck
         run: pnpm exec tsc --noEmit
       - name: Build

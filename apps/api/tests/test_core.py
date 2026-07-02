@@ -4,10 +4,11 @@ from __future__ import annotations
 import pytest
 
 from app.arena.rating import compute_bradley_terry, compute_elo
+from app.safety.refusal import is_jailbroken, is_refusal
 from app.scoring.base import ScoringContext, extract_boxed, extract_choice, extract_number
 from app.scoring.code_exec import build_program, pass_at_k, run_program
+from app.scoring.judge import _extract_json
 from app.scoring.rule_based import multiple_choice, numeric_match
-from app.safety.refusal import is_jailbroken, is_refusal
 
 
 def test_extract_choice():
@@ -71,3 +72,66 @@ def test_bradley_terry_and_elo_orders_stronger_first():
     assert bt["strong"]["rating"] > bt["weak"]["rating"]
     elo = compute_elo(matches)
     assert elo["strong"] > elo["weak"]
+
+
+def test_bradley_terry_winless_model_stays_on_scale():
+    """A model with zero wins must not blow the board off the ~1000-2000 Elo scale
+    (regression: the unregularized MLE produced ratings like 3600 / -1920)."""
+    # A beats B twice; B is winless.
+    bt = compute_bradley_terry(
+        [{"model_a": "A", "model_b": "B", "winner": "a"}] * 2, bootstrap=0
+    )
+    assert bt["A"]["rating"] > bt["B"]["rating"]
+    for stats in bt.values():
+        assert 600 <= stats["rating"] <= 1800
+
+    # 3-model chain where C loses every game.
+    bt3 = compute_bradley_terry(
+        [
+            {"model_a": "A", "model_b": "B", "winner": "a"},
+            {"model_a": "A", "model_b": "C", "winner": "a"},
+            {"model_a": "B", "model_b": "C", "winner": "a"},
+        ],
+        bootstrap=0,
+    )
+    assert bt3["A"]["rating"] > bt3["B"]["rating"] > bt3["C"]["rating"]
+    for stats in bt3.values():
+        assert 600 <= stats["rating"] <= 1800
+
+
+def test_extract_json_tolerant():
+    assert _extract_json('{"winner": "A"}') == {"winner": "A"}
+    # embedded in prose
+    assert _extract_json('Sure! {"overall": 4} done')["overall"] == 4
+    # trailing comma + single quotes are tolerated
+    assert _extract_json("{'winner': 'tie',}") == {"winner": "tie"}
+    # unrecoverable -> None (not a crash)
+    assert _extract_json("no json here at all") is None
+    assert _extract_json("{not valid") is None
+
+
+def test_bool_num_is_portable_and_averages():
+    """bool_num must AVG booleans as 1.0/0.0 on SQLite (and, by construction, Postgres)."""
+    from sqlalchemy import Boolean, Column, Integer, String, create_engine, func, select
+    from sqlalchemy.orm import Session, declarative_base
+
+    from app.api.sqlutil import bool_num
+
+    Base = declarative_base()
+
+    class _Row(Base):
+        __tablename__ = "t"
+        id = Column(Integer, primary_key=True)
+        flag = Column(Boolean)
+        status = Column(String)
+
+    engine = create_engine("sqlite://")
+    Base.metadata.create_all(engine)
+    with Session(engine) as s:
+        s.add_all([_Row(flag=True, status="ok"), _Row(flag=True, status="error"),
+                   _Row(flag=False, status="ok"), _Row(flag=False, status="ok")])
+        s.commit()
+        pass_rate = s.scalar(select(func.avg(bool_num(_Row.flag))))
+        assert abs(float(pass_rate) - 0.5) < 1e-9
+        err_rate = s.scalar(select(func.avg(bool_num(_Row.status == "error"))))
+        assert abs(float(err_rate) - 0.25) < 1e-9

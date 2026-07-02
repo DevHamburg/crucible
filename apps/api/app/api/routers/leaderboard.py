@@ -1,8 +1,11 @@
 """Leaderboards: capability (aggregated benchmark scores) and arena Elo/Bradley-Terry."""
 from __future__ import annotations
 
+import time
+
+import anyio
 from fastapi import APIRouter, Depends
-from sqlalchemy import Float, cast, func, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, is_registered
@@ -12,6 +15,16 @@ from app.core.db import get_session
 from app.models import ArenaMatch, ModelCatalog, Result, Run, User
 
 router = APIRouter(prefix="/leaderboard", tags=["leaderboard"])
+
+# Small TTL cache for the Elo board: the Bradley-Terry MLE + bootstrap is CPU-heavy and the
+# leaderboard is polled/opened frequently. Keyed by (kind, scope, uid); invalidated by TTL.
+_ELO_CACHE: dict[tuple, tuple[float, dict]] = {}
+_ELO_TTL = 10.0
+
+
+def _compute_ratings(md: list[dict]) -> tuple[dict, dict]:
+    """Pure CPU work — run off the event loop via anyio.to_thread."""
+    return compute_bradley_terry(md), compute_elo(md)
 
 
 async def _display_names(session: AsyncSession) -> dict[str, str]:
@@ -79,15 +92,24 @@ async def elo_leaderboard(
     session: AsyncSession = Depends(get_session),
 ) -> dict:
     scoped = not is_registered(user)
-    stmt = select(ArenaMatch).where(ArenaMatch.winner != "")
+    uid = user.id if user else None
+    cache_key = (kind or "", scoped, uid)
+    cached = _ELO_CACHE.get(cache_key)
+    if cached and (time.monotonic() - cached[0]) < _ELO_TTL:
+        return cached[1]
+
+    # Select ONLY the three columns the ratings need — never the full ArenaMatch rows
+    # (which carry response_a/response_b up to 6000 chars + rationale + transcript JSON).
+    stmt = select(ArenaMatch.model_a, ArenaMatch.model_b, ArenaMatch.winner).where(
+        ArenaMatch.winner != ""
+    )
     if kind:
         stmt = stmt.where(ArenaMatch.kind == kind)
     if scoped:
-        stmt = stmt.where(ArenaMatch.user_id == (user.id if user else None))
-    matches = (await session.scalars(stmt)).all()
-    md = [{"model_a": m.model_a, "model_b": m.model_b, "winner": m.winner} for m in matches]
-    bt = compute_bradley_terry(md)
-    elo = compute_elo(md)
+        stmt = stmt.where(ArenaMatch.user_id == uid)
+    rows = (await session.execute(stmt)).all()
+    md = [{"model_a": a, "model_b": b, "winner": w} for a, b, w in rows]
+    bt, elo = await anyio.to_thread.run_sync(_compute_ratings, md)
     names = await _display_names(session)
 
     board = []
@@ -109,4 +131,6 @@ async def elo_leaderboard(
     board.sort(key=lambda x: x["rating"], reverse=True)
     for i, e in enumerate(board):
         e["rank"] = i + 1
-    return {"n_matches": len(md), "scope": "own" if scoped else "global", "leaderboard": board}
+    result = {"n_matches": len(md), "scope": "own" if scoped else "global", "leaderboard": board}
+    _ELO_CACHE[cache_key] = (time.monotonic(), result)
+    return result

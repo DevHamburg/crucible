@@ -3,10 +3,12 @@
 import { LogOut, Sparkles, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useApp } from "@/lib/store";
+import { useHydrated } from "@/lib/useHydrated";
 
 export function Topbar() {
   const { user, logout } = useApp();
-  const registered = user && !user.is_anonymous;
+  const hydrated = useHydrated();
+  const registered = hydrated && user && !user.is_anonymous;
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-line bg-black/30 px-6 backdrop-blur-xl">

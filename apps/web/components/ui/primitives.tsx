@@ -147,6 +147,9 @@ export function Toggle({
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
       onClick={() => onChange(!checked)}
       className="flex items-center gap-2 text-sm text-zinc-300"
     >

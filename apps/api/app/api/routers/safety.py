@@ -1,7 +1,7 @@
 """Safety / red-team: run the probe suite and report robustness."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import Float, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,8 +33,8 @@ class SafetyRunIn(BaseModel):
     categories: list[str] = Field(default_factory=list)
     adaptive: bool = False
     attacker_model: str | None = None
-    max_rounds: int = 4
-    limit_per_category: int | None = None
+    max_rounds: int = Field(default=4, ge=1, le=10)
+    limit_per_category: int | None = Field(default=None, ge=1, le=100)
 
 
 @router.get("/categories")
@@ -131,7 +131,8 @@ async def safety_report(run_id: str, session: AsyncSession = Depends(get_session
 
 @router.get("/samples/{run_id}")
 async def safety_samples(
-    run_id: str, only_jailbroken: bool = True, limit: int = 40,
+    run_id: str, only_jailbroken: bool = True,
+    limit: int = Query(default=40, ge=1, le=200),
     session: AsyncSession = Depends(get_session),
 ) -> list[dict]:
     stmt = select(SafetyResult).where(SafetyResult.run_id == run_id)

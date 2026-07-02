@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import asyncio
 from collections import defaultdict
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 
 class EventBus:
@@ -36,7 +36,10 @@ class EventBus:
             while True:
                 event = await q.get()
                 yield event
-                if event.get("type") in ("run_completed", "run_error", "match_completed"):
+                # Terminal events close the subscription. Note: `match_completed`
+                # fires per bracket match on a tournament channel and is NOT terminal —
+                # only the whole-run/whole-tournament terminators end the stream.
+                if event.get("type") in ("run_completed", "run_error", "tournament_completed"):
                     break
         finally:
             self._subs[channel].discard(q)

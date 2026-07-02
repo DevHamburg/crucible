@@ -49,9 +49,11 @@ export default function LoginPage() {
         <Card>
           <form onSubmit={submit} className="space-y-4">
             <div>
-              <label className="mb-1 block text-xs text-zinc-400">Email</label>
+              <label htmlFor="login-email" className="mb-1 block text-xs text-zinc-400">Email</label>
               <input
+                id="login-email"
                 type="email"
+                autoComplete="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -60,9 +62,11 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs text-zinc-400">Password</label>
+              <label htmlFor="login-password" className="mb-1 block text-xs text-zinc-400">Password</label>
               <input
+                id="login-password"
                 type="password"
+                autoComplete={mode === "login" ? "current-password" : "new-password"}
                 required
                 minLength={6}
                 value={password}

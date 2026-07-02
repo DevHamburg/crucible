@@ -22,7 +22,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useRun, useRunResults } from "@/lib/hooks";
-import { api, subscribe } from "@/lib/api";
+import { api, subscribe, type SSEStatus } from "@/lib/api";
 import { ms, money, num, pct } from "@/lib/format";
 import {
   AnimatedNumber,
@@ -60,10 +60,11 @@ export default function RunPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id ?? "";
 
-  const { data: run } = useRun(id, true);
+  const { data: run, isError, error } = useRun(id, true);
   const status = run?.status ?? "pending";
   const isRunning = status === "running" || status === "pending";
   const isDone = status === "completed";
+  const [streamStatus, setStreamStatus] = useState<SSEStatus>("connecting");
 
   // live state accumulated from SSE
   const [live, setLive] = useState<{
@@ -80,7 +81,9 @@ export default function RunPage() {
 
   useEffect(() => {
     if (!id || !isRunning) return;
-    const unsub = subscribe(`/runs/${id}/stream`, (ev: any) => {
+    const unsub = subscribe(
+      `/runs/${id}/stream`,
+      (ev: any) => {
       setLive((prev) => {
         const next = { ...prev };
         if (typeof ev.progress === "number") next.progress = ev.progress;
@@ -110,10 +113,12 @@ export default function RunPage() {
           next.feed = [feedItem, ...prev.feed].slice(0, 12);
         }
 
-        if (ev.type === "run_completed") next.completed = true;
+        if (ev.type === "run_completed" || ev.type === "run_error") next.completed = true;
         return next;
       });
-    });
+      },
+      { onStatus: setStreamStatus }
+    );
     return unsub;
   }, [id, isRunning]);
 
@@ -143,6 +148,27 @@ export default function RunPage() {
       .map(([ref, t]) => ({ ref, ...t, acc: t.n ? t.sumScore / t.n : 0 }))
       .sort((a, b) => b.acc - a.acc);
   }, [live.tallies]);
+
+  if (isError) {
+    const st = (error as any)?.status;
+    return (
+      <EmptyState
+        icon={<Ban className="h-8 w-8" />}
+        title={st === 404 ? "Run not found" : st === 403 ? "This run is private" : "Couldn't load run"}
+      >
+        <div className="space-y-3">
+          <p>
+            {st === 403
+              ? "Sign in to view community runs, or open one of your own."
+              : (error as any)?.message ?? "The run could not be loaded."}
+          </p>
+          <Link href="/runs" className="btn-ghost inline-flex text-sm">
+            <ArrowLeft className="h-4 w-4" /> Back to all runs
+          </Link>
+        </div>
+      </EmptyState>
+    );
+  }
 
   if (!run) {
     return (
@@ -222,7 +248,7 @@ export default function RunPage() {
               <div className="flex items-center gap-2 text-sm font-medium text-zinc-300">
                 <Activity className="h-4 w-4 text-accent" /> Live progress
               </div>
-              <LiveDot label="streaming" />
+              <LiveDot label={streamStatus === "open" ? "streaming" : streamStatus === "reconnecting" ? "reconnecting…" : streamStatus === "closed" ? "offline" : "connecting…"} />
             </div>
             <div className="flex items-end justify-between">
               <div className="text-4xl font-bold stat-num">

@@ -4,6 +4,11 @@ import { useEffect } from "react";
 import { api } from "@/lib/api";
 import { useApp } from "@/lib/store";
 
+// Module-level guard: React 19 StrictMode runs effects mount→cleanup→mount in dev, which
+// would otherwise POST /auth/anon twice and create an orphaned anonymous account per load.
+// Sharing one in-flight promise makes concurrent boots reuse the same request.
+let anonBoot: Promise<any> | null = null;
+
 /**
  * Seamless onboarding: every visitor gets an anonymous session so they can run
  * benchmarks and store keys immediately. Registering later upgrades this same
@@ -17,9 +22,11 @@ export function AuthBoot() {
     async function boot() {
       if (!token) {
         try {
-          const res = await api.post<any>("/auth/anon");
+          anonBoot = anonBoot ?? api.post<any>("/auth/anon");
+          const res = await anonBoot;
           if (!cancelled) setAuth(res.access_token, res.user);
         } catch {
+          anonBoot = null; // allow a retry on the next mount
           /* backend offline — pages fall back to empty states */
         }
         return;

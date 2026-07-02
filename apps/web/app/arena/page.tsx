@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { useCreateTournament, useMatches, useModels } from "@/lib/hooks";
@@ -253,6 +254,7 @@ export default function ArenaPage() {
   const { selected, toggleSelected } = useApp();
   const createTournament = useCreateTournament();
 
+  const qc = useQueryClient();
   const [mode, setMode] = useState<Mode>("duel");
   const [domain, setDomain] = useState("logic");
   const [modelA, setModelA] = useState("");
@@ -318,6 +320,9 @@ export default function ArenaPage() {
         prompt: prompt.trim() || undefined,
       });
       setMatch(r);
+      // reflect the new battle in "Recent battles" + the Elo board immediately
+      qc.invalidateQueries({ queryKey: ["matches"] });
+      qc.invalidateQueries({ queryKey: ["elo"] });
     } catch (e: any) {
       toast.error(e?.message ?? "Match failed");
     } finally {
@@ -341,6 +346,8 @@ export default function ArenaPage() {
         rounds,
       });
       setDebate(r);
+      qc.invalidateQueries({ queryKey: ["matches"] });
+      qc.invalidateQueries({ queryKey: ["elo"] });
     } catch (e: any) {
       toast.error(e?.message ?? "Debate failed");
     } finally {

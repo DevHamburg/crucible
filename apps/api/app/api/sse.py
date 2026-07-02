@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Awaitable, Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi.responses import StreamingResponse
 
@@ -45,7 +45,9 @@ async def event_stream(
                     last = snap
                     await queue.put({"type": "poll", **snap})
                     if snap.get("status") in ("completed", "error", "cancelled"):
-                        await queue.put({"type": "run_completed", **snap})
+                        # Emit a terminal type this stream actually recognises, so the
+                        # relay loop below breaks (tournament streams use a different one).
+                        await queue.put({"type": done_types[0], **snap})
                         return
 
         tasks = [asyncio.create_task(pump_bus())]
@@ -56,7 +58,7 @@ async def event_stream(
             while True:
                 try:
                     ev = await asyncio.wait_for(queue.get(), timeout=15.0)
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     yield ": keepalive\n\n"
                     continue
                 if ev.get("type") == "_bus_closed":

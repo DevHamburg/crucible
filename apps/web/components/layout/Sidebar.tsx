@@ -44,7 +44,11 @@ export function Sidebar() {
 
       <nav className="flex flex-1 flex-col gap-1">
         {NAV.map((item) => {
-          const active = item.href === "/" ? path === "/" : path.startsWith(item.href);
+          // Match on segment boundaries so "/run" doesn't also light up on "/runs".
+          const active =
+            item.href === "/"
+              ? path === "/"
+              : path === item.href || path.startsWith(item.href + "/");
           const Icon = item.icon;
           return (
             <Link

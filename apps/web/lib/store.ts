@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { setToken } from "./api";
+import { getQueryClient } from "./qc";
 
 interface AuthUser {
   id: string;
@@ -28,12 +29,22 @@ export const useApp = create<AppState>()(
       user: null,
       token: null,
       setAuth: (token, user) => {
+        const prev = get().user;
         setToken(token);
         set({ token, user });
+        const qc = getQueryClient();
+        if (qc) {
+          // Switching to a different account: drop everything so the previous identity's
+          // cached runs/keys/leaderboards can't render. First login / re-auth of the same
+          // account: just refetch for freshness.
+          if (prev && prev.id !== user.id) qc.clear();
+          else qc.invalidateQueries();
+        }
       },
       logout: () => {
         setToken(null);
         set({ token: null, user: null });
+        getQueryClient()?.clear(); // no stale private data left for the next visitor
       },
       selected: [],
       toggleSelected: (ref) => {

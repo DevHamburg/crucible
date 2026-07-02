@@ -1,8 +1,10 @@
 """Observability: cost, tokens, latency, traces."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import Float, cast, func, select
+import time
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, is_registered
@@ -12,6 +14,11 @@ from app.models import Generation, ModelCatalog, Result, Run, User
 
 router = APIRouter(prefix="/observability", tags=["observability"])
 
+# The overview is polled every ~5s by both the dashboard and the observability page; cache it
+# briefly per (scope, uid) so N open tabs don't each trigger full-table aggregates every tick.
+_OVERVIEW_CACHE: dict[tuple, tuple[float, dict]] = {}
+_OVERVIEW_TTL = 4.0
+
 
 @router.get("/overview")
 async def overview(
@@ -19,44 +26,53 @@ async def overview(
 ) -> dict:
     scoped = not is_registered(user)
     uid = user.id if user else None
+    cache_key = (scoped, uid)
+    cached = _OVERVIEW_CACHE.get(cache_key)
+    if cached and (time.monotonic() - cached[0]) < _OVERVIEW_TTL:
+        return cached[1]
 
-    def gen_q(agg):
-        q = select(agg)
-        if scoped:
-            q = q.join(Run, Run.id == Generation.run_id).where(Run.user_id == uid)
-        return q
+    # One pass over generations (the largest table) instead of six separate scans.
+    gen_q = select(
+        func.count(Generation.id),
+        func.coalesce(func.sum(Generation.cost), 0.0),
+        func.coalesce(func.sum(Generation.prompt_tokens), 0),
+        func.coalesce(func.sum(Generation.completion_tokens), 0),
+        func.coalesce(func.avg(Generation.latency_ms), 0.0),
+        func.coalesce(func.sum(bool_num(Generation.status == "error")), 0.0),
+    )
+    if scoped:
+        gen_q = gen_q.join(Run, Run.id == Generation.run_id).where(Run.user_id == uid)
+    n_gens, total_cost, prompt_tokens, completion_tokens, avg_latency, errors = (
+        await session.execute(gen_q)
+    ).one()
 
-    def run_q(agg, *where):
-        q = select(agg).where(*where)
-        if scoped:
-            q = q.where(Run.user_id == uid)
-        return q
+    # One pass over runs (count + active count).
+    run_q = select(func.count(Run.id), func.coalesce(func.sum(bool_num(Run.status == "running")), 0.0))
+    if scoped:
+        run_q = run_q.where(Run.user_id == uid)
+    n_runs, active_runs = (await session.execute(run_q)).one()
 
-    n_runs = await session.scalar(run_q(func.count(Run.id))) or 0
-    n_gens = await session.scalar(gen_q(func.count(Generation.id))) or 0
-    total_cost = await session.scalar(gen_q(func.sum(Generation.cost))) or 0.0
-    prompt_tokens = await session.scalar(gen_q(func.sum(Generation.prompt_tokens))) or 0
-    completion_tokens = await session.scalar(gen_q(func.sum(Generation.completion_tokens))) or 0
-    avg_latency = await session.scalar(gen_q(func.avg(Generation.latency_ms))) or 0.0
-    errors = await session.scalar(gen_q(func.count(Generation.id)).where(Generation.status == "error")) or 0
-    active_runs = await session.scalar(run_q(func.count(Run.id), Run.status == "running")) or 0
-    n_results = await session.scalar(
-        (select(func.count(Result.id)).join(Run, Run.id == Result.run_id).where(Run.user_id == uid))
-        if scoped else select(func.count(Result.id))
-    ) or 0
-    return {
+    res_q = select(func.count(Result.id))
+    if scoped:
+        res_q = res_q.join(Run, Run.id == Result.run_id).where(Run.user_id == uid)
+    n_results = await session.scalar(res_q) or 0
+
+    n_gens = int(n_gens or 0)
+    result = {
         "scope": "own" if scoped else "global",
-        "runs": int(n_runs),
-        "active_runs": int(active_runs),
-        "generations": int(n_gens),
+        "runs": int(n_runs or 0),
+        "active_runs": int(active_runs or 0),
+        "generations": n_gens,
         "results": int(n_results),
-        "total_cost": round(float(total_cost), 4),
-        "prompt_tokens": int(prompt_tokens),
-        "completion_tokens": int(completion_tokens),
-        "total_tokens": int(prompt_tokens + completion_tokens),
-        "avg_latency_ms": round(float(avg_latency), 1),
-        "error_rate": round(errors / n_gens, 4) if n_gens else 0.0,
+        "total_cost": round(float(total_cost or 0), 4),
+        "prompt_tokens": int(prompt_tokens or 0),
+        "completion_tokens": int(completion_tokens or 0),
+        "total_tokens": int((prompt_tokens or 0) + (completion_tokens or 0)),
+        "avg_latency_ms": round(float(avg_latency or 0), 1),
+        "error_rate": round(int(errors or 0) / n_gens, 4) if n_gens else 0.0,
     }
+    _OVERVIEW_CACHE[cache_key] = (time.monotonic(), result)
+    return result
 
 
 @router.get("/costs")
@@ -98,26 +114,38 @@ async def costs(
 
 @router.get("/generations")
 async def generations(
-    run_id: str | None = None, limit: int = 100, session: AsyncSession = Depends(get_session)
+    run_id: str | None = None,
+    limit: int = Query(default=100, ge=1, le=200),
+    session: AsyncSession = Depends(get_session),
 ) -> list[dict]:
-    stmt = select(Generation).order_by(Generation.created_at.desc()).limit(limit)
+    # Select only the columns the response uses — never response_text (up to 8000 chars) or
+    # the request JSON, which the trace list doesn't show.
+    G = Generation
+    stmt = (
+        select(
+            G.id, G.run_id, G.model_ref, G.provider, G.kind, G.prompt_tokens,
+            G.completion_tokens, G.latency_ms, G.cost, G.status, G.error, G.created_at,
+        )
+        .order_by(G.created_at.desc())
+        .limit(limit)
+    )
     if run_id:
-        stmt = stmt.where(Generation.run_id == run_id)
-    rows = (await session.scalars(stmt)).all()
+        stmt = stmt.where(G.run_id == run_id)
+    rows = (await session.execute(stmt)).all()
     return [
         {
-            "id": g.id,
-            "run_id": g.run_id,
-            "model_ref": g.model_ref,
-            "provider": g.provider,
-            "kind": g.kind,
-            "prompt_tokens": g.prompt_tokens,
-            "completion_tokens": g.completion_tokens,
-            "latency_ms": g.latency_ms,
-            "cost": g.cost,
-            "status": g.status,
-            "error": g.error[:200],
-            "created_at": g.created_at.isoformat() if g.created_at else None,
+            "id": r.id,
+            "run_id": r.run_id,
+            "model_ref": r.model_ref,
+            "provider": r.provider,
+            "kind": r.kind,
+            "prompt_tokens": r.prompt_tokens,
+            "completion_tokens": r.completion_tokens,
+            "latency_ms": r.latency_ms,
+            "cost": r.cost,
+            "status": r.status,
+            "error": (r.error or "")[:200],
+            "created_at": r.created_at.isoformat() if r.created_at else None,
         }
-        for g in rows
+        for r in rows
     ]

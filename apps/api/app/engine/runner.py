@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 
@@ -46,7 +46,7 @@ class ModelInfo:
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 async def _load_user_keys(session, user_id: str | None) -> dict[str, str]:
@@ -223,7 +223,8 @@ async def execute_run(run_id: str) -> None:
         run.done_items = 0
         await session.commit()
 
-    budget = float((config.get("budget") or settings.global_run_budget_usd))
+    budget_cfg = config.get("budget")
+    budget = float(budget_cfg if budget_cfg not in (None, "") else settings.global_run_budget_usd)
     concurrency = int(config.get("concurrency") or settings.max_concurrency)
     params = {
         "temperature": config.get("temperature", 0.2),
@@ -245,6 +246,8 @@ async def execute_run(run_id: str) -> None:
     done = 0
     total_cost = 0.0
     stopped = False
+    cancelled = False
+    error_msg = ""
     try:
         for fut in asyncio.as_completed(tasks):
             outcome: ItemOutcome = await fut
@@ -291,7 +294,14 @@ async def execute_run(run_id: str) -> None:
                 run.done_items = done
                 run.total_cost = round(total_cost, 6)
                 run.progress = round(done / max(len(worklist), 1), 4)
+                # DB-signalled cancel: works even when the run executes in a
+                # separate arq worker process (in-process task.cancel can't reach it).
+                if run.status == "cancelled":
+                    cancelled = True
                 await s.commit()
+
+            if cancelled:
+                break
 
             await bus.publish(
                 run_id,
@@ -313,29 +323,52 @@ async def execute_run(run_id: str) -> None:
 
             if total_cost > budget and not stopped:
                 stopped = True
-                for t in tasks:
-                    t.cancel()
                 break
     except asyncio.CancelledError:
-        pass
+        # in-process cancellation (task.cancel from the cancel endpoint)
+        cancelled = True
+    except Exception as exc:  # noqa: BLE001 — any failure must terminate the run cleanly
+        error_msg = str(exc) or exc.__class__.__name__
+    finally:
+        # Never leave provider calls running in the background: cancel + drain every
+        # child task so their cost/lifetime can't outlive the run (budget-stop,
+        # cancel, and error paths all pass through here).
+        for t in tasks:
+            t.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
+    # Terminal status. Priority: explicit cancel > error > completed. Re-read so a
+    # cancel committed by the endpoint after our last check still wins.
     async with SessionLocal() as s:
         run = await s.get(Run, run_id)
-        run.status = "completed"
-        run.finished_at = utcnow()
-        run.progress = round(done / max(len(worklist), 1), 4)
-        if stopped:
-            run.error = f"stopped: budget ${budget} exceeded (${total_cost:.4f})"
-        await s.commit()
+        if run is not None:
+            if cancelled or run.status == "cancelled":
+                run.status = "cancelled"
+            elif error_msg:
+                run.status = "error"
+                run.error = error_msg[:2000]
+            else:
+                run.status = "completed"
+                if stopped:
+                    run.error = f"stopped: budget ${budget} exceeded (${total_cost:.4f})"
+            run.finished_at = utcnow()
+            run.progress = round(done / max(len(worklist), 1), 4)
+            run.total_cost = round(total_cost, 6)
+            await s.commit()
+            final_status = run.status
+        else:
+            final_status = "completed"
 
     await bus.publish(
         run_id,
         {
-            "type": "run_completed",
+            "type": "run_error" if final_status == "error" else "run_completed",
             "run_id": run_id,
+            "status": final_status,
             "done": done,
             "total": len(worklist),
             "total_cost": round(total_cost, 4),
             "stopped": stopped,
+            "error": error_msg,
         },
     )

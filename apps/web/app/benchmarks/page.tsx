@@ -136,20 +136,19 @@ function BenchmarkCard({ b, index }: { b: Benchmark; index: number }) {
             <span className="chip !py-0.5">{num(b.num_items)} items</span>
             {lic && <span className="chip !py-0.5">{lic}</span>}
           </div>
-
-          {b.source_url && (
-            <a
-              href={b.source_url}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex w-fit items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-accent"
-              style={{ color: undefined }}
-            >
-              <ExternalLink className="h-3 w-3" /> Source
-            </a>
-          )}
         </button>
+
+        {/* Kept OUTSIDE the toggle button — an <a> inside a <button> is invalid DOM nesting. */}
+        {b.source_url && (
+          <a
+            href={b.source_url}
+            target="_blank"
+            rel="noreferrer"
+            className="mx-5 mb-4 -mt-1 inline-flex w-fit items-center gap-1 text-xs text-zinc-500 transition-colors hover:text-accent"
+          >
+            <ExternalLink className="h-3 w-3" /> Source
+          </a>
+        )}
 
         <AnimatePresence initial={false}>
           {open && (

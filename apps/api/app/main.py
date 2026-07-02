@@ -21,28 +21,35 @@ from app.api.routers import (
     safety,
 )
 from app.core.config import settings
-from app.core.db import SessionLocal, init_db
+from app.core.db import SessionLocal, init_db, reconcile_stale_runs, startup_lock
 from app.models import ModelCatalog
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    # zero-config first run: auto-seed if the catalog is empty
-    async with SessionLocal() as session:
-        n = await session.scalar(select(func.count(ModelCatalog.id)))
-    if not n:
-        try:
-            from app.seeds.seed import seed_admin, seed_benchmarks, seed_models
+    # Serialize schema-create + first-run seed across `--workers N` (no-op on SQLite).
+    async with startup_lock():
+        await init_db()
+        # zero-config first run: auto-seed if the catalog is empty
+        async with SessionLocal() as session:
+            n = await session.scalar(select(func.count(ModelCatalog.id)))
+        if not n:
+            try:
+                from app.seeds.seed import seed_admin, seed_benchmarks, seed_models
 
-            async with SessionLocal() as session:
-                await seed_models(session)
-                await seed_benchmarks(session)
-                await seed_admin(session)
-                await session.commit()
-            print("✓ auto-seeded database (first run)")
-        except Exception as exc:  # noqa: BLE001
-            print(f"! auto-seed skipped: {exc}")
+                async with SessionLocal() as session:
+                    await seed_models(session)
+                    await seed_benchmarks(session)
+                    await seed_admin(session)
+                    await session.commit()
+                print("✓ auto-seeded database (first run)")
+            except Exception as exc:  # noqa: BLE001
+                print(f"! auto-seed skipped: {exc}")
+        # Reap runs orphaned by a previous crash/restart so they don't hang forever.
+        try:
+            await reconcile_stale_runs()
+        except Exception as exc:  # noqa: BLE001 — never block startup on reconciliation
+            print(f"! stale-run reconcile skipped: {exc}")
     yield
 
 
@@ -79,4 +86,22 @@ async def root() -> dict:
 
 @app.get("/health", tags=["meta"])
 async def health() -> dict:
+    """Liveness: process is up and serving."""
     return {"status": "ok"}
+
+
+@app.get("/health/ready", tags=["meta"])
+async def readiness() -> dict:
+    """Readiness: the DB is actually reachable (used for deploy verification)."""
+    from sqlalchemy import text
+
+    try:
+        async with SessionLocal() as s:
+            await s.execute(text("SELECT 1"))
+        return {"status": "ready", "database": "ok"}
+    except Exception as exc:  # noqa: BLE001
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            status_code=503, content={"status": "unavailable", "database": str(exc)[:200]}
+        )

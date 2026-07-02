@@ -30,19 +30,27 @@ def compute_elo(matches: list[dict], k: float = 32.0, base: float = BASE_RATING)
     return dict(ratings)
 
 
-def _bt_fit(models: list[str], wins: np.ndarray, games: np.ndarray, iters: int = 200) -> np.ndarray:
-    """Minorization-maximization for Bradley-Terry strengths p (positive, normalized)."""
+def _bt_fit(
+    models: list[str], wins: np.ndarray, games: np.ndarray, iters: int = 200, prior: float = 1.0
+) -> np.ndarray:
+    """Minorization-maximization for Bradley-Terry strengths p (positive, normalized).
+
+    A conjugate Beta-style prior gives every model `prior` virtual games (split as a tie)
+    against a fixed strength-1 anchor. Without it, a model with zero wins collapses to
+    strength → 0, which `_to_elo` then maps to ~-4800 and blows up the whole board
+    (a winless model early on is the norm, not the exception).
+    """
     n = len(models)
     p = np.ones(n)
     for _ in range(iters):
         p_new = np.zeros(n)
         for i in range(n):
-            denom = 0.0
+            denom = prior / (p[i] + 1.0)  # virtual games vs. the strength-1 anchor
             for j in range(n):
                 if i == j or games[i, j] == 0:
                     continue
                 denom += games[i, j] / (p[i] + p[j])
-            p_new[i] = wins[i] / denom if denom > 0 else p[i]
+            p_new[i] = (wins[i] + 0.5 * prior) / denom if denom > 0 else p[i]
         s = p_new.sum()
         if s <= 0 or not np.isfinite(s):
             break
@@ -57,7 +65,7 @@ def _bt_fit(models: list[str], wins: np.ndarray, games: np.ndarray, iters: int =
 def _to_elo(models: list[str], p: np.ndarray) -> dict[str, float]:
     logs = np.array([400.0 * math.log10(max(x, 1e-12)) for x in p])
     logs = logs - logs.mean() + ANCHOR
-    return {m: round(float(v), 1) for m, v in zip(models, logs)}
+    return {m: round(float(v), 1) for m, v in zip(models, logs, strict=False)}
 
 
 def compute_bradley_terry(

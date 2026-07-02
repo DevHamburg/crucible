@@ -6,7 +6,7 @@ import base64
 import hashlib
 import hmac
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from cryptography.fernet import Fernet
@@ -43,7 +43,7 @@ def verify_password(password: str, stored: str) -> bool:
 # JWT
 # --------------------------------------------------------------------------- #
 def create_access_token(subject: str, extra: dict | None = None) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload = {
         "sub": subject,
         "iat": now,

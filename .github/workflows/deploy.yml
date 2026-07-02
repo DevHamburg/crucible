@@ -21,8 +21,12 @@
 # =============================================================
 name: Deploy Crucible
 
+# Deploy only runs AFTER the CI workflow succeeds on main (never on a red build), or when
+# triggered manually. The exact commit CI validated is deployed (workflow_run.head_sha).
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -33,12 +37,16 @@ concurrency:
 env:
   REGISTRY: ghcr.io
   PUBLIC_API_URL: https://crucible.hypexio.com/api
+  # The commit to build/deploy: the CI-validated SHA on workflow_run, else this ref (manual).
+  DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 
 jobs:
   images:
     name: Build & push images
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # Skip unless CI passed (or a manual dispatch).
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     permissions:
       contents: read
       packages: write
@@ -47,9 +55,11 @@ jobs:
       ghcr_repo: ${{ steps.meta.outputs.ghcr_repo }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
       - id: meta
         run: |
-          echo "image_tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${DEPLOY_SHA}" >> "$GITHUB_OUTPUT"
           echo "ghcr_repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
       - name: Login to GHCR
@@ -92,6 +102,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_SHA }}
       - name: Set up SSH
         env:
           SSH_KEY: ${{ secrets.HETZNER_SSH_KEY }}
@@ -120,7 +132,7 @@ jobs:
           USER: ${{ secrets.HETZNER_USER }}
           HOST: ${{ secrets.HETZNER_HOST }}
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: ${{ needs.images.outputs.image_tag }}
           GHCR_REPO: ${{ needs.images.outputs.ghcr_repo }}
         run: |
           ssh -i ~/.ssh/id_deploy -p "$PORT" \
@@ -129,7 +141,9 @@ jobs:
               "cd '$DEPLOY_PATH' && bash ./deploy-recreate.sh '$IMAGE_TAG' '$GHCR_REPO'"
       - name: Healthcheck
         env:
-          HEALTH_URL: ${{ secrets.HEALTH_URL || 'https://crucible.hypexio.com/health' }}
+          # /health/ready verifies the DB is reachable, so a deploy that boots but can't
+          # talk to Postgres fails the pipeline instead of going green.
+          HEALTH_URL: ${{ secrets.HEALTH_URL || 'https://crucible.hypexio.com/health/ready' }}
         run: |
           for i in $(seq 1 12); do
             code=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || echo 000)

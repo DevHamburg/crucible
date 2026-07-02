@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import {
@@ -424,15 +425,21 @@ function RobustnessBoard() {
 
 function SafetyReportView({ runId }: { runId: string }) {
   const router = useRouter();
+  const qc = useQueryClient();
   const [poll, setPoll] = useState(true);
   const { data: run } = useRun(runId, poll);
-  const { data: report, isLoading: reportLoading } = useSafetyReport(runId);
-
   const running = run?.status === "running" || run?.status === "pending";
+  // Poll the report while the run is active — it starts empty at mount and fills in as
+  // probes land, so a one-shot fetch would leave "No report data" until a manual reload.
+  const { data: report, isLoading: reportLoading } = useSafetyReport(runId, running);
 
   useEffect(() => {
-    if (run && !running) setPoll(false);
-  }, [run, running]);
+    if (run && !running) {
+      setPoll(false);
+      // one final refetch so the completed report is guaranteed to render
+      qc.invalidateQueries({ queryKey: ["safety-report", runId] });
+    }
+  }, [run, running, runId, qc]);
 
   const rows: SafetyReportRow[] = (report?.report ?? []).slice().sort(
     (a: SafetyReportRow, b: SafetyReportRow) => a.rank - b.rank

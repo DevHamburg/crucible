@@ -1,7 +1,7 @@
 """Arena: pairwise match, multi-round debate, and single-elim tournaments."""
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,7 +12,7 @@ from app.arena.battle import run_debate, run_match
 from app.arena.prompts import get_prompts, get_topics
 from app.arena.service import load_meta, sim_for
 from app.core.config import settings
-from app.core.db import get_session
+from app.core.db import SessionLocal, get_session
 from app.engine.dispatch import start_tournament
 from app.engine.runner import _load_user_keys
 from app.models import ArenaMatch, Tournament, User
@@ -62,6 +62,24 @@ def _match_out(m: ArenaMatch) -> dict:
         "rounds": m.rounds or [],
         "cost": m.cost,
         "created_at": m.created_at.isoformat() if m.created_at else None,
+    }
+
+
+# Columns for the compact list view — deliberately excludes response_a/response_b (up to
+# 6000 chars each), prompt, rationale and the rounds transcript, which list views never render.
+_SUMMARY_COLS = (
+    ArenaMatch.id, ArenaMatch.kind, ArenaMatch.domain, ArenaMatch.topic,
+    ArenaMatch.model_a, ArenaMatch.model_b, ArenaMatch.winner, ArenaMatch.judge_model,
+    ArenaMatch.cost, ArenaMatch.round_no, ArenaMatch.created_at,
+)
+
+
+def _match_summary(r) -> dict:
+    return {
+        "id": r.id, "kind": r.kind, "domain": r.domain, "topic": r.topic,
+        "model_a": r.model_a, "model_b": r.model_b, "winner": r.winner,
+        "judge_model": r.judge_model, "cost": r.cost, "round_no": r.round_no,
+        "created_at": r.created_at.isoformat() if r.created_at else None,
     }
 
 
@@ -122,19 +140,24 @@ async def create_debate(
 @router.get("/matches")
 async def list_matches(
     kind: str | None = None,
-    limit: int = 50,
+    limit: int = Query(default=50, ge=1, le=200),
     user: User | None = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> list[dict]:
     from app.api.deps import is_registered
 
-    stmt = select(ArenaMatch).where(ArenaMatch.tournament_id.is_(None)).order_by(ArenaMatch.created_at.desc()).limit(limit)
+    stmt = (
+        select(*_SUMMARY_COLS)
+        .where(ArenaMatch.tournament_id.is_(None))
+        .order_by(ArenaMatch.created_at.desc())
+        .limit(limit)
+    )
     if kind:
         stmt = stmt.where(ArenaMatch.kind == kind)
     if not is_registered(user):  # guests only see their own battles
         stmt = stmt.where(ArenaMatch.user_id == (user.id if user else None))
-    rows = (await session.scalars(stmt)).all()
-    return [_match_out(m) for m in rows]
+    rows = (await session.execute(stmt)).all()
+    return [_match_summary(r) for r in rows]
 
 
 @router.get("/matches/{match_id}")
@@ -188,17 +211,31 @@ async def create_tournament(
 
 @router.get("/tournaments")
 async def list_tournaments(
-    limit: int = 30,
+    limit: int = Query(default=30, ge=1, le=100),
     user: User | None = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ) -> list[dict]:
     from app.api.deps import is_registered
 
-    rows = (await session.scalars(select(Tournament).order_by(Tournament.created_at.desc()).limit(limit))).all()
-    if not is_registered(user):  # guests only see their own tournaments
-        uid = user.id if user else None
-        rows = [t for t in rows if (t.config or {}).get("user_id") == uid]
-    return [_tournament_out(t) for t in rows]
+    if is_registered(user):
+        rows = (
+            await session.scalars(
+                select(Tournament).order_by(Tournament.created_at.desc()).limit(limit)
+            )
+        ).all()
+        return [_tournament_out(t) for t in rows]
+
+    # Guests only see their own. The owner lives in the config JSON (not a real column), so we
+    # can't filter in SQL portably — scan a bounded recent window and filter, THEN take `limit`,
+    # so a guest's own tournament never falls out of a tiny pre-filter window.
+    uid = user.id if user else None
+    rows = (
+        await session.scalars(
+            select(Tournament).order_by(Tournament.created_at.desc()).limit(500)
+        )
+    ).all()
+    mine = [t for t in rows if (t.config or {}).get("user_id") == uid]
+    return [_tournament_out(t) for t in mine[:limit]]
 
 
 @router.get("/tournaments/{tid}")
@@ -206,30 +243,36 @@ async def get_tournament(tid: str, session: AsyncSession = Depends(get_session))
     t = await session.get(Tournament, tid)
     if not t:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Tournament not found")
-    matches = (
-        await session.scalars(
-            select(ArenaMatch).where(ArenaMatch.tournament_id == tid).order_by(ArenaMatch.round_no)
+    rows = (
+        await session.execute(
+            select(*_SUMMARY_COLS)
+            .where(ArenaMatch.tournament_id == tid)
+            .order_by(ArenaMatch.round_no)
         )
     ).all()
     out = _tournament_out(t)
-    out["matches"] = [_match_out(m) for m in matches]
+    # Compact match list: the bracket view renders from `bracket`; full transcripts are
+    # available per-match via /arena/matches/{id}.
+    out["matches"] = [_match_summary(r) for r in rows]
     return out
 
 
 @router.get("/tournaments/{tid}/stream")
-async def stream_tournament(tid: str, session: AsyncSession = Depends(get_session)):
-    t = await session.get(Tournament, tid)
-    if not t:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Tournament not found")
+async def stream_tournament(tid: str):
+    # Do NOT take a request-scoped session: SSE responses keep their dependencies open for the
+    # whole stream lifetime, which would pin a pooled DB connection for up to an hour.
+    async with SessionLocal() as s:
+        t = await s.get(Tournament, tid)
+        if not t:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Tournament not found")
+        initial = _tournament_out(t)
 
     async def poll():
-        from app.core.db import SessionLocal
-
         async with SessionLocal() as s:
             row = await s.get(Tournament, tid)
             return {"status": row.status, "champion": row.champion} if row else None
 
     return await event_stream(
-        f"tournament:{tid}", initial=_tournament_out(t), poll=poll,
+        f"tournament:{tid}", initial=initial, poll=poll,
         done_types=("tournament_completed",),
     )

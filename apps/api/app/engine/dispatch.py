@@ -3,11 +3,25 @@ worker when USE_TASK_QUEUE is on (Docker/production)."""
 from __future__ import annotations
 
 import asyncio
+import logging
 
 from app.core.config import settings
 
+log = logging.getLogger("crucible.dispatch")
+
 # keep references so tasks aren't garbage-collected mid-flight + allow cancellation
 _TASKS: dict[str, asyncio.Task] = {}
+
+
+def _on_done(key: str, task: asyncio.Task) -> None:
+    _TASKS.pop(key, None)
+    if task.cancelled():
+        return
+    exc = task.exception()
+    if exc is not None:
+        # The runner is expected to record failures on the Run row itself; surfacing the
+        # traceback here makes an otherwise-invisible in-process crash debuggable.
+        log.error("background task %s crashed: %r", key, exc, exc_info=exc)
 
 
 async def _enqueue(function: str, arg: str) -> None:
@@ -22,7 +36,7 @@ async def _enqueue(function: str, arg: str) -> None:
 def _spawn(key: str, coro) -> None:
     task = asyncio.create_task(coro)
     _TASKS[key] = task
-    task.add_done_callback(lambda t: _TASKS.pop(key, None))
+    task.add_done_callback(lambda t: _on_done(key, t))
 
 
 async def start_run(run_id: str) -> None:

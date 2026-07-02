@@ -33,7 +33,7 @@ export default function TournamentBracketPage() {
   const params = useParams<{ id: string }>();
   const id = params?.id as string;
 
-  const { data: tournament, isLoading, refetch } = useTournament(id, true);
+  const { data: tournament, isLoading, isError, refetch } = useTournament(id, true);
   const { data: models } = useModels();
 
   const [live, setLive] = useState<{
@@ -47,6 +47,16 @@ export default function TournamentBracketPage() {
 
   const refetchRef = useRef(refetch);
   refetchRef.current = refetch;
+  // Coalesce refetches: match_progress fires once per best-of game, but the bracket only
+  // needs to be re-pulled occasionally while games stream in.
+  const lastRefetch = useRef(0);
+  const debouncedRefetch = () => {
+    const now = Date.now();
+    if (now - lastRefetch.current > 1500) {
+      lastRefetch.current = now;
+      refetchRef.current?.();
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -60,11 +70,11 @@ export default function TournamentBracketPage() {
           wins_a: ev.wins_a,
           wins_b: ev.wins_b,
         });
-        refetchRef.current?.();
+        debouncedRefetch();
       }
       if (ev?.type === "tournament_completed") {
         setLive(null);
-        refetchRef.current?.();
+        refetchRef.current?.(); // final pull, not debounced
       }
     });
     return unsub;
@@ -90,6 +100,19 @@ export default function TournamentBracketPage() {
     !!m.a &&
     !!m.b &&
     ((live.a === m.a && live.b === m.b) || (live.a === m.b && live.b === m.a));
+
+  if (isError) {
+    return (
+      <EmptyState icon={<Trophy className="h-8 w-8" />} title="Tournament not found">
+        <div className="space-y-3">
+          <p>This tournament could not be loaded — it may have been removed or is private.</p>
+          <Link href="/arena" className="btn-ghost inline-flex text-sm">
+            Back to Arena
+          </Link>
+        </div>
+      </EmptyState>
+    );
+  }
 
   if (isLoading || !tournament) {
     return (

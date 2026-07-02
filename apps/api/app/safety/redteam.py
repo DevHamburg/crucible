@@ -103,7 +103,8 @@ async def adaptive_attack(
             total_cost += compute_cost(comp.prompt_tokens, comp.completion_tokens, inp, out)
             attack = comp.text.strip() or attack
 
-    return RedTeamResult(False, max_rounds, transcript, transcript[-1]["response"], round(total_cost, 6))
+    last_response = transcript[-1]["response"] if transcript else ""
+    return RedTeamResult(False, max_rounds, transcript, last_response, round(total_cost, 6))
 
 
 _ESCALATIONS = [

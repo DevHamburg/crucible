@@ -3,16 +3,18 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { Toaster } from "sonner";
+import { registerQueryClient } from "@/lib/qc";
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [client] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: { staleTime: 15_000, refetchOnWindowFocus: false, retry: 1 },
-        },
-      })
-  );
+  const [client] = useState(() => {
+    const c = new QueryClient({
+      defaultOptions: {
+        queries: { staleTime: 15_000, refetchOnWindowFocus: false, retry: 1 },
+      },
+    });
+    registerQueryClient(c); // let the auth store clear caches on identity change
+    return c;
+  });
   return (
     <QueryClientProvider client={client}>
       {children}
